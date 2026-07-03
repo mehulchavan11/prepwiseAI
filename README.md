@@ -133,3 +133,93 @@ http://localhost:3000
 # 🚀 Live Demo
 
 👉 https://prepwise-ai-livid.vercel.app
+
+---
+
+# 📸 Project Screenshots
+
+## 🏠 Landing Page
+
+![Landing Page](screenshots/landing.png)
+
+---
+
+## 📊 Admin Dashboard
+
+![Admin Dashboard](screenshots/admin-dashboard.png)
+
+---
+
+## 🏢 Company Preparation
+
+![Company View](screenshots/company-view.png)
+
+---
+
+## 👤 Student Profile
+
+![Student Profile](screenshots/student-profile.png)
+
+---
+
+# 👥 Team Members
+
+| Name | Role |
+|------|------|
+| **Mehul Chavan** | Frontend Development |
+| Soham B. | Backend Development |
+| Ajinkya Bondge | AI Features |
+| Atharv | Resume Module |
+| Prateek | Backend & Deployment |
+
+---
+
+# 💼 My Contribution
+
+As a member of the development team, my primary responsibilities included:
+
+- 🎨 Frontend Development
+- 🏠 Home Page UI
+- ℹ️ About Page
+- 📊 Dashboard Interface
+- 🏢 Company Preparation Section
+- 💻 DSA Practice Module
+- 🐛 UI Improvements & Testing
+
+---
+
+# 🔮 Future Enhancements
+
+- AI Roadmap Generator
+- Personalized Learning Paths
+- Coding Contest Integration
+- Resume Score Improvement Suggestions
+- Interview Performance Analytics
+- Leaderboards
+- Mobile Application
+- Real-time Collaboration
+
+---
+
+# 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome.
+
+Feel free to fork this repository and submit a Pull Request.
+
+---
+
+# 📜 License
+
+This project was developed for educational purposes as a Final Year Major Project.
+
+---
+
+# 🙏 Acknowledgements
+
+Special thanks to our project guide, faculty members, and teammates for their continuous support throughout the development of this project.
+
+---
+
+## ⭐ If you like this project, consider giving it a Star!
+
