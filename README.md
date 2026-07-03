@@ -37,3 +37,99 @@ Our objective was to create a single platform that assists students throughout t
 - 👤 User Authentication
 - 📱 Responsive Design
 - ⚡ Fast Performance
+
+---
+
+# 🛠️ Tech Stack
+
+### Frontend
+- React.js
+- Next.js
+- Tailwind CSS
+- JavaScript
+
+### Backend
+- Node.js
+- Express.js
+
+### Database
+- MongoDB
+
+### AI & APIs
+- Google Gemini API
+
+### Authentication
+- Clerk Authentication
+
+### Deployment
+- Vercel
+
+---
+
+# 📂 Project Structure
+
+```
+prepwiseAI/
+│── api/
+│── data/
+│── public/
+│── screenshots/
+│── scripts/
+│── server.js
+│── package-lock.json
+│── requirements.txt
+│── vercel.json
+│── README.md
+```
+
+---
+
+# ⚙️ Installation
+
+### Clone the repository
+
+```bash
+git clone https://github.com/mehulchavan11/prepwiseAI.git
+```
+
+### Navigate into the project
+
+```bash
+cd prepwiseAI
+```
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Configure Environment Variables
+
+Create a `.env` file in the root directory and add the required API keys.
+
+Example:
+
+```env
+GEMINI_API_KEY=your_api_key
+MONGODB_URI=your_mongodb_uri
+CLERK_SECRET_KEY=your_clerk_secret_key
+```
+
+### Start the development server
+
+```bash
+npm run dev
+```
+
+Open your browser and visit:
+
+```
+http://localhost:3000
+```
+
+---
+
+# 🚀 Live Demo
+
+👉 https://prepwise-ai-livid.vercel.app
