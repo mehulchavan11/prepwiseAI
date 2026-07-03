@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mock Interview | PrepWise AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- No JS ML library — face detection runs on the Python backend -->
+  <style>
+    :root {
+      --primary:#6366f1; --primary-dark:#4f46e5;
+      --bg:#f1f5f9; --surface:#fff; --border:#e2e8f0;
+      --text:#0f172a; --muted:#64748b;
+      --success:#10b981; --error:#ef4444;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+    .hdr {
+      background:#0f172a; color:#fff; height:56px; padding:0 24px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:200;
+    }
+    .hdr-brand { font-size:17px; font-weight:700; }
+    .hdr-brand span { color:#f59e0b; }
+    .back-btn {
+      display:flex; align-items:center; gap:6px; color:#94a3b8;
+      text-decoration:none; font-size:13px; font-weight:500;
+      padding:7px 14px; border-radius:8px; transition:.15s;
+    }
+    .back-btn:hover { background:rgba(255,255,255,.08); color:#fff; }
+
+    .layout { display:flex; min-height:calc(100vh - 56px); }
+
+    /* Camera sidebar */
+    .cam-sidebar {
+      width:260px; background:#0f172a; color:#fff; flex-shrink:0;
+      padding:20px; display:flex; flex-direction:column; gap:16px;
+    }
+    .cam-sidebar h3 { font-size:13px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:.5px; }
+    #cam-video { width:100%; border-radius:10px; background:#1e293b; aspect-ratio:4/3; object-fit:cover; display:block; }
+    .violation-info { font-size:12px; color:#94a3b8; }
+    .viol-counter-row {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .viol-count-badge {
+      font-size:13px; font-weight:700; padding:2px 10px; border-radius:20px;
+      background:rgba(251,191,36,.15); color:#fbbf24;
+    }
+    .viol-count-badge.danger { background:rgba(239,68,68,.2); color:#ef4444; animation:pulse .6s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+    #cam-warning {
+      background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.3);
+      border-radius:8px; padding:8px 12px; font-size:12px; color:#fca5a5;
+      display:none;
+    }
+
+    /* Termination overlay */
+    #terminate-overlay {
+      display:none; position:fixed; inset:0; z-index:9999;
+      background:#0f172a; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; padding:32px;
+    }
+    #terminate-overlay .t-icon { font-size:64px; margin-bottom:20px; }
+    #terminate-overlay h1 { font-size:28px; font-weight:700; color:#ef4444; margin-bottom:12px; }
+    #terminate-overlay p  { font-size:15px; color:#94a3b8; max-width:460px; line-height:1.7; margin-bottom:8px; }
+    #terminate-overlay .t-cd { font-size:13px; color:#64748b; margin-top:16px; }
+
+    /* Main content */
+    .main { flex:1; padding:32px; max-width:700px; }
+
+    .card { background:var(--surface); border-radius:16px; padding:28px;
+            box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04); margin-bottom:20px; }
+
+    h1 { font-size:22px; font-weight:700; margin-bottom:6px; }
+    .sub { color:var(--muted); font-size:14px; margin-bottom:24px; }
+
+    label { display:block; font-size:13px; font-weight:500; color:#374151; margin-bottom:6px; }
+    input[type=text], input[type=number], textarea, select {
+      width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:10px;
+      font-size:14px; font-family:'Inter',sans-serif; color:var(--text); background:#f8fafc;
+      transition:.2s; outline:none; resize:vertical;
+    }
+    input:focus, textarea:focus, select:focus { border-color:var(--primary); background:#fff; box-shadow:0 0 0 3px rgba(99,102,241,.1); }
+    .form-row { margin-bottom:16px; }
+
+    .btn {
+      display:inline-flex; align-items:center; gap:8px; padding:11px 24px;
+      background:var(--primary); color:#fff; border:none; border-radius:10px;
+      font-size:14px; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; transition:.2s;
+    }
+    .btn:hover { background:var(--primary-dark); transform:translateY(-1px); }
+    .btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+    .btn-ghost { background:transparent; color:var(--primary); border:1.5px solid var(--primary); }
+    .btn-ghost:hover { background:rgba(99,102,241,.06); box-shadow:none; transform:none; }
+    .btn-row { display:flex; gap:12px; flex-wrap:wrap; margin-top:20px; }
+    .btn-sm { padding:7px 16px; font-size:13px; }
+    .btn-danger { background:var(--error); }
+    .btn-danger:hover { background:#dc2626; }
+
+    /* Question progress */
+    .q-progress { display:flex; gap:8px; margin-bottom:20px; }
+    .q-step { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; border:1.5px solid var(--border); color:var(--muted); }
+    .q-step.done    { border-color:var(--success); background:rgba(16,185,129,.1); color:var(--success); }
+    .q-step.current { border-color:var(--primary); background:var(--primary); color:#fff; }
+
+    .q-num { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+    .q-text { font-size:17px; font-weight:600; line-height:1.6; margin-bottom:20px; }
+
+    /* Feedback box */
+    .feedback-box {
+      padding:16px; border-radius:10px; background:#f0fdf4;
+      border:1px solid rgba(16,185,129,.3); font-size:13px; line-height:1.7; color:#166534;
+      margin-top:16px; white-space:pre-wrap;
+    }
+    .feedback-loading { background:#f8fafc; border-color:var(--border); color:var(--muted); }
+
+    /* Summary */
+    .summary-item { padding:20px; border-radius:12px; border:1.5px solid var(--border); margin-bottom:14px; }
+    .summary-q { font-size:14px; font-weight:600; margin-bottom:10px; }
+    .summary-a { font-size:13px; color:var(--muted); margin-bottom:10px; padding-left:12px; border-left:3px solid var(--border); }
+    .summary-fb { font-size:13px; color:#166534; background:#f0fdf4; padding:10px 14px; border-radius:8px; line-height:1.6; white-space:pre-wrap; }
+
+    /* Recording indicator */
+    .rec-badge {
+      display:none; align-items:center; gap:6px; font-size:12px; font-weight:600;
+      color:#ef4444; margin-bottom:8px;
+    }
+    .rec-dot { width:8px; height:8px; border-radius:50%; background:#ef4444; animation:blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* Loading spinner */
+    .spinner { width:18px; height:18px; border:3px solid rgba(99,102,241,.2); border-top-color:var(--primary); border-radius:50%; animation:spin .7s linear infinite; display:inline-block; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    .screen { display:none; }
+    .screen.active { display:block; }
+  </style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-brand">Prep<span>Wise</span> AI</div>
+  <a href="studentdashboard.html" class="back-btn">← Dashboard</a>
+</div>
+
+<!-- Termination overlay -->
+<div id="terminate-overlay">
+  <div class="t-icon">🚫</div>
+  <h1>Interview Terminated</h1>
+  <p>You were removed from the screen <strong>5 times</strong> during the interview.<br>This incident has been <strong style="color:#ef4444">reported to the admin</strong>.</p>
+  <p style="font-size:13px;color:#475569">Proctoring violations: No face detected / Multiple people detected / Tab switched</p>
+  <div class="t-cd" id="t-cd">Redirecting to dashboard in 5 seconds…</div>
+</div>
+
+<div class="layout">
+
+  <!-- Camera sidebar -->
+  <div class="cam-sidebar">
+    <h3>Live Camera</h3>
+    <video id="cam-video" autoplay muted playsinline></video>
+    <div id="cam-warning" style="display:none;padding:5px 8px;border-radius:6px;background:rgba(239,68,68,.2);color:#fca5a5;font-size:12px;font-weight:600;text-align:center"></div>
+    <div id="face-status" style="padding:5px 8px;border-radius:6px;font-size:12px;font-weight:600;text-align:center;color:#94a3b8">⏳ Initialising camera…</div>
+    <div class="violation-info">
+      <div class="viol-counter-row">
+        <span style="font-size:12px;color:#94a3b8">Violations</span>
+        <span class="viol-count-badge" id="viol-badge">0 / 5</span>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#475569;line-height:1.5;margin-top:8px">
+      Camera and tab activity monitored during interview. Face the screen and ensure good lighting.<br><br>
+      <span style="color:#ef4444;font-weight:600">5 violations = interview terminated.</span>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- ═════════ SETUP ═════════ -->
+    <div id="setup-screen" class="screen active">
+      <div class="card">
+        <h1>AI Mock Interview</h1>
+        <p class="sub">Answer 5 AI-generated questions. Get instant feedback on each answer.</p>
+
+        <div class="form-row"><label>Username</label>
+          <input type="text" id="inp-username" placeholder="your username" /></div>
+        <div class="form-row"><label>Job Role</label>
+          <input type="text" id="inp-role" placeholder="e.g. Full Stack Developer" /></div>
+        <div class="form-row"><label>Tech Stack / Domain</label>
+          <input type="text" id="inp-stack" placeholder="e.g. React, Node.js, MongoDB" /></div>
+        <div class="form-row"><label>Years of Experience</label>
+          <input type="number" id="inp-exp" value="0" min="0" max="30" /></div>
+
+        <p id="setup-err" style="color:var(--error);font-size:13px;margin-top:12px;display:none"></p>
+        <div class="btn-row">
+          <button class="btn" id="start-btn" disabled style="opacity:.5;cursor:not-allowed">Start Interview →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═════════ INTERVIEW ═════════ -->
+    <div id="interview-screen" class="screen">
+      <div class="card">
+        <div id="q-progress-bar" class="q-progress"></div>
+
+        <div class="q-num" id="q-num-label">Question 1 of 5</div>
+        <div class="q-text" id="q-text"></div>
+
+        <div class="rec-badge" id="rec-badge"><div class="rec-dot"></div> Recording…</div>
+        <label>Your Answer</label>
+        <textarea id="answer-input" rows="5" placeholder="Type your answer here…"></textarea>
+
+        <div id="feedback-area" style="display:none">
+          <div class="feedback-box feedback-loading" id="feedback-box">Evaluating your answer…</div>
+        </div>
+
+        <div class="btn-row" id="q-btn-row">
+          <button class="btn btn-ghost btn-sm" id="record-btn">🎤 Record Answer</button>
+          <button class="btn" id="next-btn">Next Question →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═════════ SUMMARY ═════════ -->
+    <div id="summary-screen" class="screen">
+      <div class="card" style="text-align:center;margin-bottom:0">
+        <h1 style="margin-bottom:8px">Interview Complete! 🎉</h1>
+        <p class="sub" id="summary-sub"></p>
+        <div class="btn-row" style="justify-content:center">
+          <button class="btn" id="new-interview-btn">New Interview</button>
+          <a href="studentdashboard.html" class="btn btn-ghost">← Dashboard</a>
+        </div>
+      </div>
+      <div style="margin-top:24px">
+        <h2 style="font-size:16px;font-weight:700;margin-bottom:16px">Interview Summary</h2>
+        <div id="summary-container"></div>
+      </div>
+    </div>
+
+  </div><!-- end .main -->
+</div><!-- end .layout -->
+
+<script>
+// Interview generate/evaluate/save use Node.js (relative URLs) — no Render needed.
+// Only face detection (PROCTOR_API) still hits Render.
+let PROCTOR_API = '';
+const configReady = fetch('/config').then(r => r.json()).then(c => { PROCTOR_API = c.pythonApiUrl || ''; }).catch(() => {});
+
+const sd = JSON.parse(localStorage.getItem('studentData') || '{}');
+const urlUsername = new URLSearchParams(location.search).get('username') || sd.username || '';
+document.getElementById('inp-username').value = urlUsername;
+
+let iState = { questions: [], responses: [], currentIdx: 0, username: '', role: '', stack: '', experience: 0 };
+// Face detection via Python API — no client-side ML needed
+let procInterval = null;
+let violationCount = 0;
+let violationLog   = [];
+let terminated     = false;
+let recognition    = null;
+
+// ── Camera & proctoring (Python MediaPipe backend) ──
+let setupCheckInterval = null;
+let interviewStarted = false;
+
+// Capture a JPEG frame and POST to /api/proctor/detect
+async function detectFaces(videoEl) {
+  if (!videoEl || !videoEl.readyState || videoEl.readyState < 2) return -1;
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width  = videoEl.videoWidth  || 320;
+    canvas.height = videoEl.videoHeight || 240;
+    canvas.getContext('2d').drawImage(videoEl, 0, 0);
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.7));
+    const form = new FormData();
+    form.append('file', blob, 'frame.jpg');
+    const res = await fetch(`${PROCTOR_API}/api/proctor/detect`, { method: 'POST', body: form });
+    if (!res.ok) return -1;
+    const data = await res.json();
+    return data.faces ?? -1;
+  } catch { return -1; }
+}
+
+(async function initCamera() {
+  const video      = document.getElementById('cam-video');
+  const faceStatus = document.getElementById('face-status');
+  const startBtn   = document.getElementById('start-btn');
+
+  // 1. Get camera
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    video.srcObject = stream;
+  } catch {
+    faceStatus.textContent = '⚠ Camera denied — proctoring disabled';
+    faceStatus.style.color = '#f87171';
+    startBtn.disabled = false; startBtn.style.opacity = '1'; startBtn.style.cursor = 'pointer';
+    return;
+  }
+
+  faceStatus.textContent = '⏳ Waiting for server…';
+  await configReady;
+  await new Promise(r => setTimeout(r, 800));
+  const warmup = await detectFaces(video);
+  if (warmup === -1) {
+    faceStatus.textContent = '⚠ Face detection unavailable. You may still proceed.';
+    faceStatus.style.color = '#f87171';
+    startBtn.disabled = false; startBtn.style.opacity = '1'; startBtn.style.cursor = 'pointer';
+    return;
+  }
+
+  // 3. Live check loop
+  setupCheckInterval = setInterval(async () => {
+    if (interviewStarted) return;
+    const n = await detectFaces(video);
+    if (n === -1) return;
+
+    if (n === 1) {
+      faceStatus.textContent = '✓ Face detected — ready';
+      faceStatus.style.color = '#34d399';
+      startBtn.disabled = false; startBtn.style.opacity = '1'; startBtn.style.cursor = 'pointer';
+    } else if (n === 0) {
+      faceStatus.textContent = '✗ No face — look at the camera';
+      faceStatus.style.color = '#f87171';
+      startBtn.disabled = true; startBtn.style.opacity = '.5'; startBtn.style.cursor = 'not-allowed';
+    } else {
+      faceStatus.textContent = `✗ ${n} faces — only 1 person allowed`;
+      faceStatus.style.color = '#fbbf24';
+      startBtn.disabled = true; startBtn.style.opacity = '.5'; startBtn.style.cursor = 'not-allowed';
+    }
+  }, 1500);
+})();
+
+async function runDetection() {
+  if (terminated) return;
+  const video = document.getElementById('cam-video');
+  const warn  = document.getElementById('cam-warning');
+  const badge = document.getElementById('viol-badge');
+
+  const n = await detectFaces(video);
+  if (n === -1) return; // API error — skip, don't penalise
+
+  let violationType = null;
+  if (n === 0)    violationType = 'No Face Detected';
+  else if (n > 1) violationType = 'Multiple Faces Detected';
+
+  if (violationType) {
+    warn.textContent = `⚠ ${violationType}`;
+    warn.style.display = 'block';
+    violationCount++;
+    violationLog.push({ type: violationType, time: new Date().toISOString() });
+    badge.textContent = `${violationCount} / 5`;
+    badge.className = 'viol-count-badge' + (violationCount >= 3 ? ' danger' : '');
+    if (iState.username) {
+      fetch(`/api/interview/log-violation`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: iState.username, violation: violationType }),
+      }).catch(() => {});
+    }
+    if (violationCount >= 5) terminateInterview();
+  } else {
+    warn.style.display = 'none';
+  }
+}
+
+function isInterviewProctoringActive() {
+  return interviewStarted && !terminated && procInterval !== null;
+}
+
+function recordTabSwitchViolation() {
+  if (!isInterviewProctoringActive()) return;
+
+  const violationType = 'Tab Switched';
+  const warn  = document.getElementById('cam-warning');
+  const badge = document.getElementById('viol-badge');
+
+  warn.textContent = `Violation: ${violationType}`;
+  warn.style.display = 'block';
+  violationCount++;
+  violationLog.push({ type: violationType, time: new Date().toISOString() });
+  badge.textContent = `${violationCount} / 5`;
+  badge.className = 'viol-count-badge' + (violationCount >= 3 ? ' danger' : '');
+
+  if (iState.username) {
+    fetch(`/api/interview/log-violation`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: iState.username, violation: violationType }),
+    }).catch(() => {});
+  }
+
+  if (violationCount >= 5) terminateInterview();
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) recordTabSwitchViolation();
+});
+
+async function terminateInterview() {
+  if (terminated) return;
+  terminated = true;
+  interviewStarted = false;
+  clearInterval(procInterval); procInterval = null;
+
+  if (iState.username) {
+    fetch(`/api/interview/terminate`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username:        iState.username,
+        role:            iState.role,
+        violation_count: violationCount,
+        violations:      violationLog,
+      }),
+    }).catch(() => {});
+  }
+
+  document.getElementById('terminate-overlay').style.display = 'flex';
+  let secs = 5;
+  const cd = document.getElementById('t-cd');
+  const tick = setInterval(() => {
+    secs--;
+    cd.textContent = `Redirecting to dashboard in ${secs} second${secs !== 1 ? 's' : ''}…`;
+    if (secs <= 0) { clearInterval(tick); window.location.href = 'studentdashboard.html'; }
+  }, 1000);
+}
+
+// ── Setup ──
+document.getElementById('start-btn').addEventListener('click', async () => {
+  const username = document.getElementById('inp-username').value.trim();
+  const role     = document.getElementById('inp-role').value.trim();
+  const stack    = document.getElementById('inp-stack').value.trim();
+  const exp      = parseInt(document.getElementById('inp-exp').value) || 0;
+  const errEl    = document.getElementById('setup-err');
+
+  if (!username || !role || !stack) {
+    errEl.textContent = 'Please fill in all fields.'; errEl.style.display = '';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  const btn = document.getElementById('start-btn');
+  btn.innerHTML = '<div class="spinner"></div> Generating questions…'; btn.disabled = true;
+
+  try {
+    const data = await fetch(`/api/interview/generate`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role, stack, experience: exp }),
+    }).then(r => r.json());
+
+    if (data.error) { errEl.textContent = data.error; errEl.style.display = ''; btn.innerHTML = 'Start Interview →'; btn.disabled = false; return; }
+
+    iState = { questions: data.questions, responses: [], currentIdx: 0, username, role, stack, experience: exp };
+
+    // Stop setup face-check interval and start live proctoring
+    interviewStarted = true;
+    if (setupCheckInterval) { clearInterval(setupCheckInterval); setupCheckInterval = null; }
+    procInterval = setInterval(runDetection, 1500);
+
+    buildProgressBar();
+    showScreen('interview-screen');
+    renderQuestion();
+
+  } catch {
+    errEl.textContent = 'Could not reach the API. Make sure the server is running.';
+    errEl.style.display = '';
+  }
+  btn.innerHTML = 'Start Interview →'; btn.disabled = false;
+});
+
+// ── Progress bar ──
+function buildProgressBar() {
+  const bar = document.getElementById('q-progress-bar');
+  bar.innerHTML = '';
+  iState.questions.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'q-step'; d.textContent = i + 1; d.id = `step-${i}`;
+    bar.appendChild(d);
+  });
+  updateStep(0, 'current');
+}
+
+function updateStep(i, status) {
+  const el = document.getElementById(`step-${i}`);
+  if (el) { el.className = 'q-step ' + status; }
+}
+
+// ── Question ──
+function renderQuestion() {
+  const i = iState.currentIdx;
+  const q = iState.questions[i];
+  document.getElementById('q-num-label').textContent = `Question ${i + 1} of ${iState.questions.length}`;
+  document.getElementById('q-text').textContent = q;
+  document.getElementById('answer-input').value = '';
+  document.getElementById('feedback-area').style.display = 'none';
+  document.getElementById('next-btn').textContent = i < iState.questions.length - 1 ? 'Next Question →' : 'Finish Interview →';
+  document.getElementById('next-btn').disabled = false;
+}
+
+// ── Voice recording ──
+document.getElementById('record-btn').addEventListener('click', () => {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { alert('Speech recognition not supported in this browser. Use Chrome.'); return; }
+
+  if (recognition) { recognition.stop(); return; }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.continuous = false;
+
+  const badge = document.getElementById('rec-badge');
+  badge.style.display = 'flex';
+  document.getElementById('record-btn').textContent = '⏹ Stop Recording';
+
+  recognition.onresult = e => {
+    document.getElementById('answer-input').value += (document.getElementById('answer-input').value ? ' ' : '') + e.results[0][0].transcript;
+  };
+  recognition.onend = () => {
+    badge.style.display = 'none';
+    document.getElementById('record-btn').textContent = '🎤 Record Answer';
+    recognition = null;
+  };
+  recognition.start();
+});
+
+// ── Next question / Submit ──
+document.getElementById('next-btn').addEventListener('click', async () => {
+  const i      = iState.currentIdx;
+  const q      = iState.questions[i];
+  const answer = document.getElementById('answer-input').value.trim();
+  const btn    = document.getElementById('next-btn');
+
+  // Show feedback loading
+  document.getElementById('feedback-area').style.display = '';
+  document.getElementById('feedback-box').textContent = 'Evaluating your answer…';
+  document.getElementById('feedback-box').className = 'feedback-box feedback-loading';
+  btn.disabled = true;
+
+  let feedback = 'No feedback available.';
+  try {
+    const res = await fetch(`/api/interview/evaluate`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q, answer }),
+    }).then(r => r.json());
+    feedback = res.feedback || feedback;
+  } catch { feedback = 'Could not retrieve feedback (server error).'; }
+
+  document.getElementById('feedback-box').textContent = feedback;
+  document.getElementById('feedback-box').className = 'feedback-box';
+
+  iState.responses.push({ question: q, answer, feedback });
+  updateStep(i, 'done');
+
+  const isLast = i >= iState.questions.length - 1;
+  if (!isLast) {
+    // Small delay so user can read feedback, then move on
+    setTimeout(() => {
+      iState.currentIdx++;
+      updateStep(iState.currentIdx, 'current');
+      renderQuestion();
+    }, 2000);
+  } else {
+    // Finish
+    btn.innerHTML = '⌛ Saving…';
+    await saveInterview();
+    showSummary();
+  }
+  btn.disabled = false;
+});
+
+async function saveInterview() {
+  try {
+    await fetch(`/api/interview/save`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: iState.username, role: iState.role,
+        stack: iState.stack, experience: iState.experience,
+        responses: iState.responses,
+      }),
+    });
+  } catch { /* ignore — results shown locally */ }
+}
+
+function showSummary() {
+  interviewStarted = false;
+  if (procInterval) { clearInterval(procInterval); procInterval = null; }
+
+  document.getElementById('summary-sub').textContent = `${iState.role} • ${iState.stack} • ${iState.experience} yr(s) experience`;
+  const container = document.getElementById('summary-container');
+  container.innerHTML = '';
+  iState.responses.forEach((r, i) => {
+    const div = document.createElement('div');
+    div.className = 'summary-item';
+    div.innerHTML = `
+      <div class="summary-q">Q${i+1}: ${r.question}</div>
+      <div class="summary-a">${r.answer || '(no answer given)'}</div>
+      <div class="summary-fb">${r.feedback}</div>`;
+    container.appendChild(div);
+  });
+  showScreen('summary-screen');
+}
+
+document.getElementById('new-interview-btn').addEventListener('click', () => {
+  iState = { questions:[], responses:[], currentIdx:0, username:'', role:'', stack:'', experience:0 };
+  violationCount = 0;
+  violationLog = [];
+  terminated = false;
+  interviewStarted = false;
+  document.getElementById('viol-badge').textContent = '0 / 5';
+  document.getElementById('viol-badge').className = 'viol-count-badge';
+  document.getElementById('cam-warning').style.display = 'none';
+  document.getElementById('inp-role').value = '';
+  document.getElementById('inp-stack').value = '';
+  document.getElementById('inp-exp').value = '0';
+  showScreen('setup-screen');
+});
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+lucide.createIcons();
+</script>
+</body>
+</html>

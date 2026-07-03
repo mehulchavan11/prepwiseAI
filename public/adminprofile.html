@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Profile | PrepWise AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background: #f1f5f9;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #0f172a;
+            position: fixed;
+            top: 0; left: 0; height: 100%;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .sidebar-header h2 { font-size: 20px; font-weight: 700; color: #fff; }
+        .sidebar-header h2 span { color: #f59e0b; }
+        .sidebar-header p { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+        .sidebar-nav { padding: 16px 12px; flex: 1; }
+
+        .sidebar-nav a {
+            color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 16px; border-radius: 8px; transition: all 0.15s; margin-bottom: 2px;
+        }
+
+        .sidebar-nav a:hover { background: rgba(16, 185, 129, 0.1); color: #e2e8f0; }
+        .sidebar-nav a.active { background: rgba(16, 185, 129, 0.15); color: #fff; }
+
+        .nav-icon { width: 20px; display: flex; align-items: center; justify-content: center; }
+        .nav-icon i { width: 18px; height: 18px; }
+
+        .sidebar-footer {
+            padding: 16px 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .sidebar-footer a {
+            color: #ef4444; text-decoration: none; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 16px; border-radius: 8px; transition: all 0.15s;
+        }
+
+        .sidebar-footer a:hover { background: rgba(239, 68, 68, 0.1); }
+
+        .main-content {
+            margin-left: 260px; flex: 1; padding: 32px 40px;
+            display: flex; justify-content: center; align-items: flex-start;
+        }
+
+        .profile-card {
+            background: #fff; border-radius: 16px; padding: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            width: 100%; max-width: 520px; margin-top: 40px;
+        }
+
+        .profile-card h1 {
+            font-size: 22px; font-weight: 700; color: #0f172a;
+            text-align: center; margin-bottom: 32px;
+        }
+
+        .form-group { margin-bottom: 18px; }
+
+        .form-group label {
+            display: block; font-size: 13px; font-weight: 500;
+            color: #374151; margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%; padding: 11px 14px;
+            border: 1.5px solid #e2e8f0; border-radius: 10px;
+            font-size: 14px; font-family: 'Inter', sans-serif;
+            color: #0f172a; background: #f8fafc; outline: none; transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: #10b981; background: #fff;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .form-group input:disabled {
+            background: #f1f5f9; color: #64748b; cursor: not-allowed;
+        }
+
+        .form-group input[readonly] {
+            background: #f1f5f9; color: #94a3b8;
+        }
+
+        .btn-group {
+            display: flex; gap: 12px; margin-top: 24px;
+        }
+
+        .btn-edit {
+            flex: 1; padding: 12px; background: #059669; color: #fff;
+            border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
+            font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s;
+        }
+
+        .btn-edit:hover { background: #047857; }
+
+        .btn-save {
+            flex: 1; padding: 12px; background: #2563eb; color: #fff;
+            border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
+            font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s;
+            display: none;
+        }
+
+        .btn-save:hover { background: #1d4ed8; }
+
+        .btn-cancel {
+            flex: 1; padding: 12px; background: #f1f5f9; color: #475569;
+            border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px;
+            font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer;
+            transition: all 0.2s; display: none;
+        }
+
+        .btn-cancel:hover { background: #e2e8f0; }
+
+        .message {
+            text-align: center; margin-top: 16px; font-size: 13px;
+            padding: 10px; border-radius: 8px;
+        }
+
+        .error-message { color: #e11d48; background: #fff1f2; }
+        .success-message { color: #059669; background: #ecfdf5; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Prep<span>Wise</span> AI</h2>
+            <p>Admin Panel</p>
+        </div>
+        <div class="sidebar-nav">
+            <a href="addashboard.html"><span class="nav-icon"><i data-lucide="bar-chart-3"></i></span> Dashboard</a>
+            <a href="admin-dashboard.html"><span class="nav-icon"><i data-lucide="users"></i></span> Manage Students</a>
+            <a href="adminprofile.html" class="active"><span class="nav-icon"><i data-lucide="user"></i></span> Admin Profile</a>
+            <a href="admin-dashboard2.html"><span class="nav-icon"><i data-lucide="megaphone"></i></span> Announcements</a>
+            <a href="admin-proctor.html"><span class="nav-icon"><i data-lucide="shield-alert"></i></span> Proctoring Reports</a>
+            <a href="admin-contacts.html"><span class="nav-icon"><i data-lucide="mail"></i></span> Contact Messages</a>
+        </div>
+        <div class="sidebar-footer">
+            <a href="#" id="logout-link"><span class="nav-icon"><i data-lucide="log-out"></i></span> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="profile-card">
+            <h1>Admin Profile</h1>
+            <form id="profile-form">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="username" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="name" disabled>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" disabled>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="phone" disabled>
+                </div>
+                <div class="form-group">
+                    <label>Position</label>
+                    <input type="text" id="position" disabled>
+                </div>
+            </form>
+            <div class="btn-group">
+                <button id="edit-btn" class="btn-edit">Edit Profile</button>
+                <button id="save-btn" class="btn-save">Save Changes</button>
+                <button id="cancel-btn" class="btn-cancel">Cancel</button>
+            </div>
+            <div id="error-message" class="message error-message" style="display:none;"></div>
+            <div id="success-message" class="message success-message" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        function checkAuth() {
+            const adminData = JSON.parse(localStorage.getItem('adminData'));
+            if (!adminData || !adminData.username) {
+                window.location.href = 'admin-login.html';
+                return false;
+            }
+            return adminData;
+        }
+
+        const usernameInput = document.getElementById('username');
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
+        const positionInput = document.getElementById('position');
+        const editBtn = document.getElementById('edit-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+
+        let originalProfileData = {};
+
+        async function fetchAdminProfile() {
+            const adminData = checkAuth();
+            if (!adminData) return;
+
+            try {
+                const response = await fetch(`/admin/profile?username=${adminData.username}`);
+                if (!response.ok) throw new Error("Failed to fetch profile");
+
+                const profileData = await response.json();
+                usernameInput.value = profileData.username;
+                nameInput.value = profileData.name || '';
+                emailInput.value = profileData.email || '';
+                phoneInput.value = profileData.phone || '';
+                positionInput.value = profileData.position || '';
+                originalProfileData = { ...profileData };
+            } catch (error) {
+                errorMessage.textContent = error.message;
+                errorMessage.style.display = 'block';
+            }
+        }
+
+        function toggleEditMode(isEditing) {
+            [nameInput, emailInput, phoneInput, positionInput].forEach(field => {
+                field.disabled = !isEditing;
+            });
+            editBtn.style.display = isEditing ? 'none' : 'block';
+            saveBtn.style.display = isEditing ? 'block' : 'none';
+            cancelBtn.style.display = isEditing ? 'block' : 'none';
+            if (!isEditing) {
+                errorMessage.style.display = 'none';
+                successMessage.style.display = 'none';
+            }
+        }
+
+        async function saveProfile() {
+            const adminData = checkAuth();
+            if (!adminData) return;
+
+            const updatedProfile = {
+                username: adminData.username,
+                name: nameInput.value,
+                email: emailInput.value,
+                phone: phoneInput.value,
+                position: positionInput.value
+            };
+
+            try {
+                const response = await fetch('/admin/update', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedProfile)
+                });
+                if (!response.ok) throw new Error("Failed to update profile");
+                successMessage.textContent = "Profile updated successfully";
+                successMessage.style.display = 'block';
+                toggleEditMode(false);
+                originalProfileData = { ...updatedProfile };
+            } catch (error) {
+                errorMessage.textContent = error.message;
+                errorMessage.style.display = 'block';
+            }
+        }
+
+        function cancelEdit() {
+            nameInput.value = originalProfileData.name || '';
+            emailInput.value = originalProfileData.email || '';
+            phoneInput.value = originalProfileData.phone || '';
+            positionInput.value = originalProfileData.position || '';
+            toggleEditMode(false);
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchAdminProfile);
+        editBtn.addEventListener('click', () => toggleEditMode(true));
+        saveBtn.addEventListener('click', saveProfile);
+        cancelBtn.addEventListener('click', cancelEdit);
+
+        document.getElementById('logout-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = 'admin-login.html';
+        });
+    </script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

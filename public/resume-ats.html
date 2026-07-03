@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resume ATS Scanner | PrepWise AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      --primary:#6366f1; --primary-dark:#4f46e5;
+      --bg:#f1f5f9; --surface:#fff; --border:#e2e8f0;
+      --text:#0f172a; --muted:#64748b;
+      --success:#10b981; --error:#ef4444;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+    .hdr {
+      background:#0f172a; color:#fff; height:56px; padding:0 24px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:100;
+    }
+    .hdr-brand { font-size:17px; font-weight:700; }
+    .hdr-brand span { color:#f59e0b; }
+    .back-btn {
+      display:flex; align-items:center; gap:6px; color:#94a3b8;
+      text-decoration:none; font-size:13px; font-weight:500;
+      padding:7px 14px; border-radius:8px; transition:.15s;
+    }
+    .back-btn:hover { background:rgba(255,255,255,.08); color:#fff; }
+
+    .page { max-width:820px; margin:0 auto; padding:36px 20px 60px; }
+
+    .card { background:var(--surface); border-radius:16px; padding:28px;
+            box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04); margin-bottom:24px; }
+
+    h1 { font-size:22px; font-weight:700; margin-bottom:6px; }
+    .sub { color:var(--muted); font-size:14px; margin-bottom:24px; }
+
+    label { display:block; font-size:13px; font-weight:500; color:#374151; margin-bottom:6px; }
+    textarea {
+      width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px;
+      font-size:14px; font-family:'Inter',sans-serif; color:var(--text); background:#f8fafc;
+      resize:vertical; outline:none; transition:.2s;
+    }
+    textarea:focus { border-color:var(--primary); background:#fff; box-shadow:0 0 0 3px rgba(99,102,241,.1); }
+
+    /* File drop zone */
+    .drop-zone {
+      border:2px dashed var(--border); border-radius:12px; padding:28px;
+      text-align:center; cursor:pointer; transition:.2s; background:#fafbff;
+    }
+    .drop-zone:hover, .drop-zone.dragover { border-color:var(--primary); background:rgba(99,102,241,.04); }
+    .drop-zone .dz-icon { color:var(--primary); margin-bottom:10px; }
+    .drop-zone p { font-size:14px; color:var(--muted); }
+    .drop-zone strong { color:var(--primary); }
+    .drop-zone input[type=file] { display:none; }
+    #file-name { font-size:13px; font-weight:600; color:var(--success); margin-top:10px; display:none; }
+
+    /* Action buttons */
+    .action-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:20px; }
+    .action-btn {
+      border:1.5px solid var(--border); border-radius:12px; padding:16px 12px; text-align:center;
+      cursor:pointer; background:var(--surface); transition:.2s; font-family:'Inter',sans-serif;
+    }
+    .action-btn:hover { border-color:var(--primary); background:rgba(99,102,241,.04); }
+    .action-btn.active { border-color:var(--primary); background:rgba(99,102,241,.07); }
+    .action-btn .ab-icon { font-size:24px; margin-bottom:8px; }
+    .action-btn .ab-title { font-size:14px; font-weight:600; color:var(--text); }
+    .action-btn .ab-desc  { font-size:12px; color:var(--muted); margin-top:4px; }
+    .action-btn:disabled  { opacity:.5; cursor:not-allowed; }
+
+    /* Results */
+    #results-card { display:none; }
+    .result-text { font-size:14px; line-height:1.8; color:#374151; white-space:pre-wrap; }
+    .error-box { background:rgba(239,68,68,.05); border:1px solid rgba(239,68,68,.2); border-radius:10px; padding:14px; color:var(--error); font-size:13px; }
+
+    /* Loading */
+    .spinner { width:22px; height:22px; border:3px solid rgba(99,102,241,.2); border-top-color:var(--primary); border-radius:50%; animation:spin .7s linear infinite; display:inline-block; vertical-align:middle; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    #loading-bar { display:none; padding:16px 0; text-align:center; color:var(--muted); font-size:14px; gap:10px; align-items:center; justify-content:center; }
+  </style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-brand">Prep<span>Wise</span> AI</div>
+  <a href="studentdashboard.html" class="back-btn">← Dashboard</a>
+</div>
+
+<div class="page">
+  <div class="card">
+    <h1>Resume ATS Scanner</h1>
+    <p class="sub">Upload your resume and paste the job description to get an AI-powered ATS analysis.</p>
+
+    <!-- Job description -->
+    <div style="margin-bottom:20px">
+      <label>Job Description</label>
+      <textarea id="job-desc" rows="5" placeholder="Paste the job description here…"></textarea>
+    </div>
+
+    <!-- PDF upload -->
+    <label>Resume (PDF)</label>
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <div class="dz-icon"><i data-lucide="file-up" style="width:32px;height:32px"></i></div>
+      <p>Drag & drop your PDF or <strong>click to browse</strong></p>
+      <p style="font-size:12px;margin-top:4px">PDF files only</p>
+      <div id="file-name"></div>
+      <input type="file" id="file-input" accept=".pdf" />
+    </div>
+
+    <!-- Action buttons -->
+    <div class="action-grid">
+      <button class="action-btn" data-mode="review" onclick="analyze('review', this)">
+        <div class="ab-icon">🔍</div>
+        <div class="ab-title">Review Resume</div>
+        <div class="ab-desc">HR perspective evaluation</div>
+      </button>
+      <button class="action-btn" data-mode="match" onclick="analyze('match', this)">
+        <div class="ab-icon">📊</div>
+        <div class="ab-title">Match Score</div>
+        <div class="ab-desc">ATS compatibility percentage</div>
+      </button>
+    </div>
+
+    <div id="loading-bar">
+      <div class="spinner"></div> Analyzing with AI — this may take a few seconds…
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="card" id="results-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h2 id="results-title" style="font-size:17px;font-weight:700">Analysis Results</h2>
+      <button class="btn btn-ghost btn-sm" onclick="clearResults()" style="padding:6px 14px;font-size:12px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--primary);border:1.5px solid var(--primary);cursor:pointer;font-family:inherit;font-weight:600">
+        Clear
+      </button>
+    </div>
+    <div id="results-body"></div>
+  </div>
+</div>
+
+<script>
+let API = '';
+const configReady = fetch('/config').then(r => r.json()).then(c => { API = c.pythonApiUrl || ''; }).catch(() => {});
+
+async function waitForServer() {
+  await configReady;
+  if (!API) return;
+  for (let i = 0; i < 12; i++) {
+    try { const r = await fetch(`${API}/`, { signal: AbortSignal.timeout(8000) }); if (r.ok) return; } catch {}
+  }
+}
+const serverReady = waitForServer();
+
+let selectedFile = null;
+
+// ── File input ──
+const fileInput = document.getElementById('file-input');
+const dropZone  = document.getElementById('drop-zone');
+
+fileInput.addEventListener('change', e => setFile(e.target.files[0]));
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file?.type === 'application/pdf') setFile(file);
+  else alert('Please drop a PDF file.');
+});
+
+function setFile(file) {
+  if (!file) return;
+  selectedFile = file;
+  const fn = document.getElementById('file-name');
+  fn.textContent = `✓ ${file.name}`;
+  fn.style.display = 'block';
+}
+
+// ── Analyze ──
+async function analyze(mode, btn) {
+  await serverReady;
+  const jobDesc = document.getElementById('job-desc').value.trim();
+  if (!selectedFile) { alert('Please upload your resume PDF first.'); return; }
+
+  document.getElementById('loading-bar').style.display  = 'flex';
+  document.getElementById('results-card').style.display = 'none';
+  document.querySelectorAll('.action-btn').forEach(b => { b.disabled = true; b.classList.remove('active'); });
+  btn.classList.add('active');
+
+  const form = new FormData();
+  form.append('file', selectedFile);
+  form.append('job_desc', jobDesc);
+  form.append('mode', mode);
+
+  try {
+    const data = await fetch(`${API}/api/resume/analyze`, { method: 'POST', body: form }).then(r => r.json());
+    renderResults(data, mode);
+  } catch (e) {
+    renderError('Could not reach the API. Make sure the server is running.');
+  }
+
+  document.getElementById('loading-bar').style.display = 'none';
+  document.querySelectorAll('.action-btn').forEach(b => b.disabled = false);
+}
+
+function renderResults(data, mode) {
+  const card  = document.getElementById('results-card');
+  const body  = document.getElementById('results-body');
+  const title = document.getElementById('results-title');
+  card.style.display = 'block';
+
+  const titles = { review: '🔍 Resume Review', match: '📊 ATS Match Score' };
+  title.textContent = titles[mode] || 'Analysis Results';
+
+  if (data.error) { renderError(data.error); return; }
+
+  body.innerHTML = `<div class="result-text">${escapeHtml(data.data || '')}</div>`;
+}
+
+function renderError(msg) {
+  const card = document.getElementById('results-card');
+  document.getElementById('results-body').innerHTML = `<div class="error-box">⚠ ${escapeHtml(msg)}</div>`;
+  card.style.display = 'block';
+}
+
+function clearResults() {
+  document.getElementById('results-card').style.display = 'none';
+  document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('active'));
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+lucide.createIcons();
+</script>
+</body>
+</html>

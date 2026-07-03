@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proctoring Reports | PrepWise AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; background: #f1f5f9; }
+
+        .sidebar {
+            width: 260px; background: #0f172a; position: fixed;
+            top: 0; left: 0; height: 100%; display: flex; flex-direction: column; z-index: 10;
+        }
+        .sidebar-header { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-header h2 { font-size: 20px; font-weight: 700; color: #fff; }
+        .sidebar-header h2 span { color: #f59e0b; }
+        .sidebar-header p { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .sidebar-nav { padding: 16px 12px; flex: 1; }
+        .sidebar-nav a {
+            color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 16px; border-radius: 8px; transition: all 0.15s; margin-bottom: 2px;
+        }
+        .sidebar-nav a:hover { background: rgba(16,185,129,0.1); color: #e2e8f0; }
+        .sidebar-nav a.active { background: rgba(16,185,129,0.15); color: #fff; }
+        .nav-icon { width: 20px; display: flex; align-items: center; justify-content: center; }
+        .nav-icon i { width: 18px; height: 18px; }
+        .sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-footer a {
+            color: #ef4444; text-decoration: none; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 16px; border-radius: 8px; transition: all 0.15s;
+        }
+        .sidebar-footer a:hover { background: rgba(239,68,68,0.1); }
+
+        .main-content { margin-left: 260px; flex: 1; padding: 32px 40px; }
+
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
+        }
+        .page-header h1 { font-size: 24px; font-weight: 700; color: #0f172a; }
+
+        .refresh-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 9px 18px; background: #6366f1; color: #fff;
+            border: none; border-radius: 10px; font-size: 13px; font-weight: 600;
+            font-family: 'Inter', sans-serif; cursor: pointer; transition: all .2s;
+        }
+        .refresh-btn:hover { background: #4f46e5; }
+        .refresh-btn i { width: 15px; height: 15px; }
+
+        .alert-info {
+            display: flex; align-items: flex-start; gap: 12px;
+            background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px;
+            padding: 14px 20px; margin-bottom: 24px; font-size: 13px; color: #991b1b; line-height: 1.6;
+        }
+        .alert-info i { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: #ef4444; }
+
+        .report-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+        .report-table th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .5px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+        .report-table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+        .report-table tr:last-child td { border-bottom: none; }
+        .report-table tr:hover td { background: #fef2f2; }
+        .badge-terminated { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; background: rgba(239,68,68,.12); color: #dc2626; }
+        .badge-type-apti  { background: rgba(99,102,241,.1); color: #6366f1; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .badge-type-inter { background: rgba(16,185,129,.1); color: #059669; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .viol-list { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+        .empty-state { text-align: center; padding: 60px; color: #94a3b8; font-size: 14px; background: #fff; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+        .empty-state i { width: 40px; height: 40px; color: #10b981; display: block; margin: 0 auto 12px; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2>Prep<span>Wise</span> AI</h2>
+        <p>Admin Panel</p>
+    </div>
+    <div class="sidebar-nav">
+        <a href="addashboard.html"><span class="nav-icon"><i data-lucide="bar-chart-3"></i></span> Dashboard</a>
+        <a href="admin-dashboard.html"><span class="nav-icon"><i data-lucide="users"></i></span> Manage Students</a>
+        <a href="adminprofile.html"><span class="nav-icon"><i data-lucide="user"></i></span> Admin Profile</a>
+        <a href="admin-dashboard2.html"><span class="nav-icon"><i data-lucide="megaphone"></i></span> Announcements</a>
+        <a href="admin-proctor.html" class="active"><span class="nav-icon"><i data-lucide="shield-alert"></i></span> Proctoring Reports</a>
+        <a href="admin-contacts.html"><span class="nav-icon"><i data-lucide="mail"></i></span> Contact Messages</a>
+    </div>
+    <div class="sidebar-footer">
+        <a href="#" id="logoutBtn"><span class="nav-icon"><i data-lucide="log-out"></i></span> Logout</a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="page-header">
+        <h1>Proctoring Violation Reports</h1>
+        <button class="refresh-btn" onclick="loadReports()">
+            <i data-lucide="refresh-cw"></i> Refresh
+        </button>
+    </div>
+
+    <div class="alert-info">
+        <i data-lucide="alert-triangle"></i>
+        <span>Students listed below had their test or interview <strong>terminated by the proctoring system</strong> after accumulating 5 proctoring violations (no face detected, multiple faces detected, or tab switched). Each incident is automatically saved when the session is terminated.</span>
+    </div>
+
+    <div id="reports-container">
+        <div class="empty-state"><i data-lucide="loader"></i>Loading reports…</div>
+    </div>
+</div>
+
+<script>
+    async function loadReports() {
+        const container = document.getElementById('reports-container');
+        container.innerHTML = '<div class="empty-state"><i data-lucide="loader" style="width:32px;height:32px;color:#94a3b8;display:block;margin:0 auto 12px"></i>Loading…</div>';
+        lucide.createIcons();
+        try {
+            const cfg = await fetch('/config').then(r => r.json()).catch(() => ({ pythonApiUrl: '' }));
+            const pythonApi = cfg.pythonApiUrl || '';
+            const reports = await fetch(`${pythonApi}/api/admin/cheating-reports`).then(r => r.json());
+            if (!reports.length) {
+                container.innerHTML = '<div class="empty-state"><i data-lucide="check-circle"></i>No cheating incidents reported yet.</div>';
+                lucide.createIcons();
+                return;
+            }
+            let html = `<table class="report-table">
+                <thead><tr>
+                    <th>Student</th><th>Test Type</th><th>Category / Role</th>
+                    <th>Violations</th><th>Date &amp; Time</th><th>Status</th>
+                </tr></thead><tbody>`;
+            reports.forEach(r => {
+                const dt = r.timestamp !== '—' ? new Date(r.timestamp).toLocaleString() : '—';
+                const typeClass = r.test_type === 'Aptitude' ? 'badge-type-apti' : 'badge-type-inter';
+                const violSummary = r.violations.slice(0, 3).map(v =>
+                    `<div>• ${v.type} <span style="color:#94a3b8">${new Date(v.time).toLocaleTimeString()}</span></div>`
+                ).join('') + (r.violations.length > 3 ? `<div style="color:#94a3b8">…+${r.violations.length - 3} more</div>` : '');
+                html += `<tr>
+                    <td><strong>${r.student_id}</strong></td>
+                    <td><span class="${typeClass}">${r.test_type}</span></td>
+                    <td>${r.category}</td>
+                    <td>
+                        <strong style="color:#ef4444;font-size:16px">${r.violation_count}</strong>
+                        <span style="color:#94a3b8;font-size:12px"> / 5</span>
+                        <div class="viol-list">${violSummary}</div>
+                    </td>
+                    <td style="color:#64748b;font-size:13px">${dt}</td>
+                    <td><span class="badge-terminated">Terminated</span></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        } catch {
+            container.innerHTML = '<div class="empty-state" style="color:#ef4444">Failed to load reports. Is the API server running?</div>';
+        }
+    }
+
+    window.onload = () => {
+        document.getElementById('logoutBtn').addEventListener('click', e => {
+            e.preventDefault();
+            localStorage.removeItem('adminData');
+            window.location.href = 'admin-login.html';
+        });
+        loadReports();
+    };
+</script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

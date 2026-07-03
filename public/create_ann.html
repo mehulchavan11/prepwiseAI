@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Announcement | PrepWise AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background: #f1f5f9;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #0f172a;
+            position: fixed;
+            top: 0; left: 0; height: 100%;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .sidebar-header h2 { font-size: 20px; font-weight: 700; color: #fff; }
+        .sidebar-header h2 span { color: #f59e0b; }
+        .sidebar-header p { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+        .sidebar-nav { padding: 16px 12px; flex: 1; }
+
+        .sidebar-nav a {
+            color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 16px; border-radius: 8px; transition: all 0.15s; margin-bottom: 2px;
+        }
+
+        .sidebar-nav a:hover { background: rgba(16, 185, 129, 0.1); color: #e2e8f0; }
+        .sidebar-nav a.active { background: rgba(16, 185, 129, 0.15); color: #fff; }
+
+        .nav-icon { width: 20px; display: flex; align-items: center; justify-content: center; }
+        .nav-icon i { width: 18px; height: 18px; }
+
+        .sidebar-footer {
+            padding: 16px 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .sidebar-footer a {
+            color: #ef4444; text-decoration: none; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 16px; border-radius: 8px; transition: all 0.15s;
+        }
+
+        .sidebar-footer a:hover { background: rgba(239, 68, 68, 0.1); }
+
+        .main-content {
+            margin-left: 260px; flex: 1; padding: 32px 40px;
+        }
+
+        .page-header { margin-bottom: 28px; }
+
+        .page-header h1 { font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+        .page-header p { color: #64748b; font-size: 14px; }
+
+        .form-card {
+            background: #fff; border-radius: 16px; padding: 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            max-width: 640px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+
+        .form-group label {
+            display: block; font-size: 13px; font-weight: 500;
+            color: #374151; margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%; padding: 11px 14px;
+            border: 1.5px solid #e2e8f0; border-radius: 10px;
+            font-size: 14px; font-family: 'Inter', sans-serif;
+            color: #0f172a; background: #f8fafc; outline: none; transition: all 0.2s;
+        }
+
+        .form-group textarea {
+            min-height: 140px; resize: vertical; line-height: 1.6;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #10b981; background: #fff;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .form-actions { display: flex; gap: 12px; }
+
+        .btn-submit {
+            padding: 12px 28px; background: #059669; color: #fff;
+            border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
+            font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s;
+        }
+
+        .btn-submit:hover { background: #047857; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+
+        .btn-back {
+            padding: 12px 28px; background: #f1f5f9; color: #475569;
+            border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px;
+            font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer;
+            text-decoration: none; display: inline-flex; align-items: center; transition: all 0.2s;
+        }
+
+        .btn-back:hover { background: #e2e8f0; }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Prep<span>Wise</span> AI</h2>
+            <p id="sidebarRole">Panel</p>
+        </div>
+        <div class="sidebar-nav" id="sidebarNav"></div>
+        <div class="sidebar-footer">
+            <a href="#" id="logoutBtn"><span class="nav-icon"><i data-lucide="log-out"></i></span> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Create Announcement</h1>
+            <p>This announcement will be visible to all students and companies on the platform.</p>
+        </div>
+
+        <div class="form-card">
+            <form id="announcementForm">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="title" placeholder="Announcement title" required>
+                </div>
+                <div class="form-group">
+                    <label>Content</label>
+                    <textarea id="content" placeholder="Write the announcement details here..." required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">Publish Announcement</button>
+                    <a id="cancelBtn" class="btn-back" href="#">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Detect role and render appropriate sidebar
+        (function() {
+            const isAdmin   = !!localStorage.getItem('adminData');
+            const isCompany = !!localStorage.getItem('companyData');
+            const nav = document.getElementById('sidebarNav');
+            const roleLabel = document.getElementById('sidebarRole');
+
+            // Set cancel button destination
+            const cancelBtn = document.getElementById('cancelBtn');
+
+            if (isAdmin) {
+                roleLabel.textContent = 'Admin Panel';
+                cancelBtn.href = 'admin-dashboard2.html';
+                nav.innerHTML = `
+                    <a href="addashboard.html"><span class="nav-icon"><i data-lucide="bar-chart-3"></i></span> Dashboard</a>
+                    <a href="admin-dashboard.html"><span class="nav-icon"><i data-lucide="users"></i></span> Manage Students</a>
+                    <a href="adminprofile.html"><span class="nav-icon"><i data-lucide="user"></i></span> Admin Profile</a>
+                    <a href="admin-dashboard2.html" class="active"><span class="nav-icon"><i data-lucide="megaphone"></i></span> Announcements</a>`;
+                document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                    e.preventDefault(); localStorage.removeItem('adminData'); window.location.href = 'admin-login.html';
+                });
+            } else if (isCompany) {
+                roleLabel.textContent = 'Company Portal';
+                cancelBtn.href = 'company-dashboard.html';
+                nav.innerHTML = `
+                    <a href="company-dashboard.html" class="active"><span class="nav-icon"><i data-lucide="megaphone"></i></span> Announcements</a>
+                    <a href="compdash.html"><span class="nav-icon"><i data-lucide="users"></i></span> View Students</a>`;
+                document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                    e.preventDefault(); localStorage.removeItem('companyData'); window.location.href = 'company-login.html';
+                });
+            } else {
+                window.location.href = 'admin-login.html';
+            }
+            lucide.createIcons();
+        })();
+
+        document.getElementById("announcementForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const title = document.getElementById("title").value;
+            const content = document.getElementById("content").value;
+
+            const response = await fetch("/announcements", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title, content }),
+            });
+
+            if (response.ok) {
+                alert("Announcement created successfully!");
+                const backHref = document.getElementById('cancelBtn').href;
+                window.location.href = backHref || "admin-dashboard2.html";
+            } else {
+                alert("Error creating announcement.");
+            }
+        });
+    </script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

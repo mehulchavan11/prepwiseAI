@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Messages | PrepWise AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; background: #f1f5f9; }
+
+        .sidebar {
+            width: 260px; background: #0f172a; position: fixed;
+            top: 0; left: 0; height: 100%; display: flex; flex-direction: column; z-index: 10;
+        }
+        .sidebar-header { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-header h2 { font-size: 20px; font-weight: 700; color: #fff; }
+        .sidebar-header h2 span { color: #f59e0b; }
+        .sidebar-header p { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .sidebar-nav { padding: 16px 12px; flex: 1; }
+        .sidebar-nav a {
+            color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 16px; border-radius: 8px; transition: all 0.15s; margin-bottom: 2px;
+        }
+        .sidebar-nav a:hover { background: rgba(16,185,129,0.1); color: #e2e8f0; }
+        .sidebar-nav a.active { background: rgba(16,185,129,0.15); color: #fff; }
+        .nav-icon { width: 20px; display: flex; align-items: center; justify-content: center; }
+        .nav-icon i { width: 18px; height: 18px; }
+        .sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-footer a {
+            color: #ef4444; text-decoration: none; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 16px; border-radius: 8px; transition: all 0.15s;
+        }
+        .sidebar-footer a:hover { background: rgba(239,68,68,0.1); }
+
+        .main-content { margin-left: 260px; flex: 1; padding: 32px 40px; }
+
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;
+        }
+        .page-header h1 { font-size: 24px; font-weight: 700; color: #0f172a; }
+        .count-pill {
+            font-size: 13px; font-weight: 600; padding: 4px 14px;
+            border-radius: 20px; background: rgba(99,102,241,.1); color: #6366f1;
+        }
+
+        .messages-list { display: flex; flex-direction: column; gap: 16px; }
+
+        .contact-card {
+            background: #fff; border-radius: 14px; padding: 20px 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.04);
+            border-left: 4px solid #6366f1; transition: all .15s;
+        }
+        .contact-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.06); }
+        .contact-card-top {
+            display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;
+        }
+        .contact-sender { display: flex; align-items: center; gap: 12px; }
+        .contact-avatar {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: rgba(99,102,241,.1); color: #6366f1;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .contact-avatar i { width: 18px; height: 18px; }
+        .contact-name { font-size: 15px; font-weight: 600; color: #0f172a; }
+        .contact-email { font-size: 12px; color: #6366f1; margin-top: 2px; }
+        .contact-subject {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px;
+        }
+        .contact-subject i { width: 14px; height: 14px; color: #6366f1; flex-shrink: 0; }
+        .contact-msg { font-size: 13px; color: #475569; line-height: 1.7; margin-bottom: 14px; }
+        .contact-footer { display: flex; justify-content: space-between; align-items: center; }
+        .contact-date { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; }
+        .contact-date i { width: 13px; height: 13px; }
+
+        .delete-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: none; border: 1.5px solid #fecaca; color: #ef4444;
+            padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s;
+        }
+        .delete-btn i { width: 13px; height: 13px; }
+        .delete-btn:hover { background: #fef2f2; border-color: #ef4444; }
+
+        .empty-state {
+            text-align: center; padding: 60px 20px; background: #fff;
+            border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.04);
+        }
+        .empty-state .icon {
+            width: 64px; height: 64px; border-radius: 16px;
+            background: rgba(99,102,241,.08); display: flex;
+            align-items: center; justify-content: center; margin: 0 auto 16px; color: #6366f1;
+        }
+        .empty-state .icon i { width: 30px; height: 30px; }
+        .empty-state h3 { font-size: 18px; font-weight: 600; color: #0f172a; margin-bottom: 8px; }
+        .empty-state p { color: #64748b; font-size: 14px; }
+
+        #toast-wrap { position:fixed; top:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:10px; pointer-events:none; }
+        .toast { display:flex; align-items:center; gap:10px; padding:13px 18px; border-radius:10px; font-size:14px; font-weight:500; color:#fff; box-shadow:0 4px 20px rgba(0,0,0,.18); min-width:260px; max-width:380px; animation:tIn .3s ease; pointer-events:all; }
+        .toast.success { background:#10b981; } .toast.error { background:#ef4444; }
+        @keyframes tIn { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes tOut { from{opacity:1} to{opacity:0;transform:translateX(40px)} }
+    </style>
+</head>
+<body>
+<div id="toast-wrap"></div>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2>Prep<span>Wise</span> AI</h2>
+        <p>Admin Panel</p>
+    </div>
+    <div class="sidebar-nav">
+        <a href="addashboard.html"><span class="nav-icon"><i data-lucide="bar-chart-3"></i></span> Dashboard</a>
+        <a href="admin-dashboard.html"><span class="nav-icon"><i data-lucide="users"></i></span> Manage Students</a>
+        <a href="adminprofile.html"><span class="nav-icon"><i data-lucide="user"></i></span> Admin Profile</a>
+        <a href="admin-dashboard2.html"><span class="nav-icon"><i data-lucide="megaphone"></i></span> Announcements</a>
+        <a href="admin-proctor.html"><span class="nav-icon"><i data-lucide="shield-alert"></i></span> Proctoring Reports</a>
+        <a href="admin-contacts.html" class="active"><span class="nav-icon"><i data-lucide="mail"></i></span> Contact Messages</a>
+    </div>
+    <div class="sidebar-footer">
+        <a href="#" id="logoutBtn"><span class="nav-icon"><i data-lucide="log-out"></i></span> Logout</a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="page-header">
+        <div style="display:flex;align-items:center;gap:14px">
+            <h1>Contact Messages</h1>
+            <span class="count-pill" id="contact-count">0 messages</span>
+        </div>
+    </div>
+    <div class="messages-list" id="messages-list">
+        <div class="empty-state">
+            <div class="icon"><i data-lucide="loader"></i></div>
+            <h3>Loading messages…</h3>
+            <p>Please wait.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function escapeHtml(s) {
+        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function showToast(msg, type = 'success') {
+        const wrap = document.getElementById('toast-wrap');
+        const icons = { success: '✓', error: '✕' };
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.innerHTML = `<span style="font-size:17px;flex-shrink:0">${icons[type] || 'ℹ'}</span><span>${msg}</span>`;
+        wrap.appendChild(t);
+        setTimeout(() => { t.style.animation = 'tOut .3s ease forwards'; setTimeout(() => t.remove(), 300); }, 3200);
+    }
+
+    async function fetchContacts() {
+        try {
+            const res = await fetch('/contacts');
+            const data = await res.json();
+            const list = document.getElementById('messages-list');
+            const pill = document.getElementById('contact-count');
+            pill.textContent = `${data.length} message${data.length !== 1 ? 's' : ''}`;
+
+            if (!data.length) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon"><i data-lucide="mail-open"></i></div>
+                        <h3>No Messages Yet</h3>
+                        <p>Contact form submissions will appear here.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            list.innerHTML = data.map(m => `
+                <div class="contact-card">
+                    <div class="contact-card-top">
+                        <div class="contact-sender">
+                            <div class="contact-avatar"><i data-lucide="user"></i></div>
+                            <div>
+                                <div class="contact-name">${escapeHtml(m.firstName)} ${escapeHtml(m.lastName)}</div>
+                                <div class="contact-email">${escapeHtml(m.email)}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contact-subject">
+                        <i data-lucide="tag"></i>
+                        ${escapeHtml(m.subject)}
+                    </div>
+                    <div class="contact-msg">${escapeHtml(m.message)}</div>
+                    <div class="contact-footer">
+                        <span class="contact-date">
+                            <i data-lucide="clock"></i>
+                            ${new Date(m.createdAt).toLocaleString()}
+                        </span>
+                        <button class="delete-btn" onclick="deleteContact('${m._id}')">
+                            <i data-lucide="trash-2"></i> Delete
+                        </button>
+                    </div>
+                </div>`).join('');
+            lucide.createIcons();
+        } catch (err) {
+            console.error('Error fetching contacts:', err);
+        }
+    }
+
+    async function deleteContact(id) {
+        if (!confirm('Delete this message?')) return;
+        try {
+            const res = await fetch(`/contacts/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showToast('Message deleted', 'success');
+                fetchContacts();
+            }
+        } catch (err) {
+            showToast('Failed to delete', 'error');
+        }
+    }
+
+    window.onload = () => {
+        document.getElementById('logoutBtn').addEventListener('click', e => {
+            e.preventDefault();
+            localStorage.removeItem('adminData');
+            window.location.href = 'admin-login.html';
+        });
+        fetchContacts();
+    };
+</script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

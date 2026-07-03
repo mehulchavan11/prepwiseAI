@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Resume | PrepWise AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #475569;
+    min-height: 100vh;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: 52px;
+    background: #0f172a; display: flex; align-items: center;
+    justify-content: space-between; padding: 0 24px; z-index: 100;
+  }
+  .topbar-brand { font-size: 16px; font-weight: 700; color: #fff; }
+  .topbar-brand span { color: #f59e0b; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .topbar-student { font-size: 13px; color: #94a3b8; }
+  .topbar-student strong { color: #e2e8f0; }
+  .btn-print {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; background: #d97706; color: #fff;
+    border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+    font-family: 'Inter', sans-serif; cursor: pointer; transition: .2s;
+    text-decoration: none;
+  }
+  .btn-print:hover { background: #b45309; }
+  .btn-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; background: rgba(255,255,255,.08); color: #e2e8f0;
+    border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
+    font-size: 13px; font-weight: 500; font-family: 'Inter', sans-serif;
+    cursor: pointer; text-decoration: none; transition: .2s;
+  }
+  .btn-back:hover { background: rgba(255,255,255,.14); }
+
+  /* ── Wrapper ── */
+  .page-wrap {
+    padding: 72px 24px 40px;
+    display: flex; justify-content: center;
+  }
+
+  /* ── A4 paper ── */
+  .resume-paper {
+    width: 794px;
+    min-height: 1123px;
+    background: #fff;
+    box-shadow: 0 8px 40px rgba(0,0,0,.4);
+  }
+
+  /* ── States ── */
+  .loading-state, .error-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 400px; gap: 12px; color: #cbd5e1; text-align: center;
+  }
+  .loading-state .spinner {
+    width: 40px; height: 40px; border: 3px solid rgba(255,255,255,.15);
+    border-top-color: #f59e0b; border-radius: 50%; animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-state h3 { font-size: 18px; font-weight: 600; color: #f1f5f9; }
+  .error-state p  { font-size: 14px; color: #94a3b8; }
+
+  /* ════ TEMPLATE 1 — CLASSIC ════ */
+  .t1 { font-family: 'EB Garamond', Georgia, serif; padding: 48px 52px; color: #1a1a1a; font-size: 10.5pt; line-height: 1.55; }
+  .t1 .r-name { font-size: 28pt; font-weight: 700; letter-spacing: -0.5px; }
+  .t1 .r-role { font-size: 11pt; color: #555; font-style: italic; margin-top: 2px; margin-bottom: 10px; }
+  .t1 .r-contacts { display: flex; flex-wrap: wrap; font-size: 9.5pt; color: #444; border-top: 2px solid #1a1a1a; border-bottom: 1px solid #ccc; padding: 6px 0; margin-bottom: 18px; gap: 0; }
+  .t1 .r-contacts span { padding-right: 12px; margin-right: 12px; border-right: 1px solid #ccc; }
+  .t1 .r-contacts span:last-child { border-right: none; }
+  .t1 .sec-title { font-size: 10.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 1.5px solid #1a1a1a; padding-bottom: 2px; margin: 18px 0 8px; }
+  .t1 .r-summary { font-size: 10pt; color: #333; }
+  .t1 .item { margin-bottom: 10px; }
+  .t1 .item-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .t1 .item-name { font-weight: 700; }
+  .t1 .item-date { font-size: 9.5pt; color: #666; }
+  .t1 .item-sub { font-style: italic; font-size: 9.5pt; color: #555; }
+  .t1 .item-tech { font-size: 9pt; color: #555; }
+  .t1 .blist { padding-left: 18px; margin-top: 4px; }
+  .t1 .blist li { font-size: 10pt; margin-bottom: 2px; color: #333; }
+  .t1 .skills-line { font-size: 10pt; margin-bottom: 5px; }
+  .t1 .cert-row { display: flex; justify-content: space-between; font-size: 10pt; margin-bottom: 4px; }
+
+  /* ════ TEMPLATE 2 — MODERN ════ */
+  .t2 { font-family: 'Inter', sans-serif; color: #1a1a1a; font-size: 9.5pt; }
+  .t2 .r-hdr { background: #1e293b; color: #fff; padding: 30px 46px 26px; }
+  .t2 .r-name { font-size: 24pt; font-weight: 700; }
+  .t2 .r-role { font-size: 10.5pt; color: #94a3b8; margin-top: 3px; }
+  .t2 .r-contacts { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 9pt; color: #cbd5e1; }
+  .t2 .r-body { padding: 24px 46px; }
+  .t2 .sec-title { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #6366f1; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 3px; margin: 16px 0 8px; }
+  .t2 .r-summary { font-size: 9.5pt; color: #475569; line-height: 1.6; }
+  .t2 .item { margin-bottom: 10px; }
+  .t2 .item-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .t2 .item-name { font-weight: 700; font-size: 10pt; color: #0f172a; }
+  .t2 .item-date { font-size: 8.5pt; color: #94a3b8; background: #f1f5f9; padding: 1px 8px; border-radius: 20px; }
+  .t2 .item-sub { font-size: 9pt; color: #6366f1; font-weight: 500; margin-top: 1px; }
+  .t2 .item-tech { font-size: 8.5pt; color: #64748b; margin-top: 2px; }
+  .t2 .blist { padding-left: 14px; margin-top: 5px; }
+  .t2 .blist li { font-size: 9pt; margin-bottom: 3px; color: #475569; }
+  .t2 .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+  .t2 .stag { padding: 3px 10px; background: #e0e7ff; color: #4338ca; border-radius: 20px; font-size: 8.5pt; font-weight: 500; }
+  .t2 .stag.soft { background: #dcfce7; color: #166534; }
+  .t2 .cert-row { display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 5px; }
+  .t2 .cert-row span { color: #6366f1; font-weight: 500; }
+
+  /* ── Print ── */
+  @media print {
+    @page { size: A4; margin: 0; }
+    .topbar { display: none !important; }
+    body { background: none; }
+    .page-wrap { padding: 0; }
+    .resume-paper { box-shadow: none; width: 100%; }
+  }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-brand">Prep<span>Wise</span> AI</div>
+    <div class="topbar-right">
+      <div class="topbar-student">Viewing resume of <strong id="student-name">…</strong></div>
+      <button class="btn-print" onclick="window.print()">&#8659; Download PDF</button>
+      <a class="btn-back" href="javascript:history.back()">&#8592; Back</a>
+    </div>
+  </div>
+
+  <div class="page-wrap">
+    <div class="resume-paper" id="resume-paper">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading resume…</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function blist(text) {
+    if (!text || !text.trim()) return '';
+    return '<ul class="blist">' +
+      text.split('\n').filter(function(l){ return l.trim(); })
+          .map(function(l){ return '<li>' + esc(l.trim()) + '</li>'; }).join('') +
+      '</ul>';
+  }
+
+  function renderClassic(d) {
+    const name = [d.fname, d.lname].filter(Boolean).join(' ');
+    const contacts = [
+      d.email ? '<span>&#9993; ' + esc(d.email) + '</span>' : '',
+      d.phone ? '<span>&#9742; ' + esc(d.phone) + '</span>' : '',
+      d.addr  ? '<span>&#128205; ' + esc(d.addr) + '</span>' : '',
+      d.linkedin ? '<span>&#128279; ' + esc(d.linkedin) + '</span>' : '',
+      d.github   ? '<span>&#128187; ' + esc(d.github) + '</span>' : '',
+    ].filter(Boolean).join('');
+
+    const edu = (d.eduItems||[]).map(function(e) {
+      return '<div class="item">' +
+        '<div class="item-row"><span class="item-name">' + (esc(e.school)||'University') + '</span><span class="item-date">' + esc(e.year||'') + '</span></div>' +
+        ([e.degree,e.field].filter(Boolean).length ? '<div class="item-sub">' + [e.degree,e.field].filter(Boolean).map(esc).join(', ') + '</div>' : '') +
+        (e.gpa ? '<div class="item-tech">GPA / Score: ' + esc(e.gpa) + '</div>' : '') +
+        '</div>';
+    }).join('');
+
+    const exp = (d.expItems||[]).map(function(e) {
+      return '<div class="item">' +
+        '<div class="item-row"><span class="item-name">' + (esc(e.company)||'Company') + '</span><span class="item-date">' + esc(e.duration||'') + '</span></div>' +
+        (e.role ? '<div class="item-sub">' + esc(e.role) + '</div>' : '') +
+        blist(e.bullets) +
+        '</div>';
+    }).join('');
+
+    const proj = (d.projItems||[]).map(function(p) {
+      return '<div class="item">' +
+        '<div class="item-row"><span class="item-name">' + (esc(p.name)||'Project') + '</span>' +
+        (p.link ? '<span class="item-tech">' + esc(p.link) + '</span>' : '') + '</div>' +
+        (p.tech ? '<div class="item-tech">' + esc(p.tech) + '</div>' : '') +
+        blist(p.desc) +
+        '</div>';
+    }).join('');
+
+    const skills =
+      ((d.techSkills||[]).length ? '<div class="skills-line"><strong>Technical:</strong> ' + (d.techSkills).map(esc).join(', ') + '</div>' : '') +
+      ((d.softSkills||[]).length ? '<div class="skills-line"><strong>Soft Skills:</strong> ' + (d.softSkills).map(esc).join(', ') + '</div>' : '');
+
+    const certs = (d.certItems||[]).map(function(c) {
+      return '<div class="cert-row"><span>' + esc(c.name) + '</span><span>' + [c.issuer,c.year].filter(Boolean).map(esc).join(', ') + '</span></div>';
+    }).join('');
+
+    return '<div class="t1">' +
+      '<div class="r-name">' + esc(name||'—') + '</div>' +
+      (d.title ? '<div class="r-role">' + esc(d.title) + '</div>' : '') +
+      '<div class="r-contacts">' + (contacts||'—') + '</div>' +
+      (d.summary ? '<div class="sec-title">Objective</div><div class="r-summary">' + esc(d.summary) + '</div>' : '') +
+      '<div class="sec-title">Education</div>' + (edu||'—') +
+      (exp ? '<div class="sec-title">Work Experience</div>' + exp : '') +
+      (proj ? '<div class="sec-title">Projects</div>' + proj : '') +
+      (skills ? '<div class="sec-title">Skills</div>' + skills : '') +
+      (certs ? '<div class="sec-title">Certifications</div>' + certs : '') +
+      '</div>';
+  }
+
+  function renderModern(d) {
+    const name = [d.fname, d.lname].filter(Boolean).join(' ');
+    const contacts = [
+      d.email ? '<span>&#9993; ' + esc(d.email) + '</span>' : '',
+      d.phone ? '<span>&#9742; ' + esc(d.phone) + '</span>' : '',
+      d.addr  ? '<span>&#128205; ' + esc(d.addr) + '</span>' : '',
+      d.linkedin ? '<span>&#128279; ' + esc(d.linkedin) + '</span>' : '',
+      d.github   ? '<span>&#128187; ' + esc(d.github) + '</span>' : '',
+    ].filter(Boolean).join('');
+
+    const edu = (d.eduItems||[]).map(function(e) {
+      return '<div class="item">' +
+        '<div class="item-row"><span class="item-name">' + (esc(e.school)||'University') + '</span><span class="item-date">' + esc(e.year||'') + '</span></div>' +
+        ([e.degree,e.field].filter(Boolean).length ? '<div class="item-sub">' + [e.degree,e.field].filter(Boolean).map(esc).join(', ') + '</div>' : '') +
+        (e.gpa ? '<div class="item-tech">GPA / Score: ' + esc(e.gpa) + '</div>' : '') +
+        '</div>';
+    }).join('');
+
+    const exp = (d.expItems||[]).map(function(e) {
+      return '<div class="item">' +
+        '<div class="item-row"><span class="item-name">' + (esc(e.company)||'Company') + '</span><span class="item-date">' + esc(e.duration||'') + '</span></div>' +
+        (e.role ? '<div class="item-sub">' + esc(e.role) + '</div>' : '') +
+        blist(e.bullets) +
+        '</div>';
+    }).join('');
+
+    const proj = (d.projItems||[]).map(function(p) {
+      return '<div class="item">' +
+        '<div class="item-row"><span class="item-name">' + (esc(p.name)||'Project') + '</span>' +
+        (p.link ? '<span style="font-size:8.5pt;color:#94a3b8">' + esc(p.link) + '</span>' : '') + '</div>' +
+        (p.tech ? '<div class="item-tech">&#128295; ' + esc(p.tech) + '</div>' : '') +
+        blist(p.desc) +
+        '</div>';
+    }).join('');
+
+    const techTags = (d.techSkills||[]).map(function(s){ return '<span class="stag">' + esc(s) + '</span>'; }).join('');
+    const softTags = (d.softSkills||[]).map(function(s){ return '<span class="stag soft">' + esc(s) + '</span>'; }).join('');
+
+    const certs = (d.certItems||[]).map(function(c) {
+      return '<div class="cert-row"><span>' + esc(c.name) + '</span><span>' + [c.issuer,c.year].filter(Boolean).map(esc).join(' &bull; ') + '</span></div>';
+    }).join('');
+
+    return '<div class="t2">' +
+      '<div class="r-hdr">' +
+        '<div class="r-name">' + esc(name||'—') + '</div>' +
+        (d.title ? '<div class="r-role">' + esc(d.title) + '</div>' : '') +
+        '<div class="r-contacts">' + (contacts||'') + '</div>' +
+      '</div>' +
+      '<div class="r-body">' +
+        (d.summary ? '<div class="sec-title">Professional Summary</div><div class="r-summary">' + esc(d.summary) + '</div>' : '') +
+        '<div class="sec-title">Education</div>' + (edu||'—') +
+        (exp ? '<div class="sec-title">Work Experience</div>' + exp : '') +
+        (proj ? '<div class="sec-title">Projects</div>' + proj : '') +
+        (techTags ? '<div class="sec-title">Technical Skills</div><div class="tags">' + techTags + '</div>' : '') +
+        (softTags ? '<div class="tags">' + softTags + '</div>' : '') +
+        (certs ? '<div class="sec-title">Certifications</div>' + certs : '') +
+      '</div>' +
+      '</div>';
+  }
+
+  async function loadResume() {
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username');
+    const paper = document.getElementById('resume-paper');
+
+    if (!username) {
+      paper.innerHTML = '<div class="error-state"><h3>No student specified</h3><p>Missing username in URL.</p></div>';
+      return;
+    }
+
+    try {
+      const res = await fetch('/students/' + encodeURIComponent(username) + '/resume');
+      if (!res.ok) throw new Error('Not found');
+      const data = await res.json();
+
+      document.getElementById('student-name').textContent = data.name || username;
+      document.title = (data.name || username) + ' — Resume | PrepWise AI';
+
+      const rd = data.resumeData;
+      if (!rd) {
+        paper.innerHTML = '<div class="error-state"><h3>No resume found</h3><p>This student has not saved a resume yet.</p></div>';
+        return;
+      }
+
+      paper.innerHTML = (rd.template === 2) ? renderModern(rd) : renderClassic(rd);
+    } catch (e) {
+      paper.innerHTML = '<div class="error-state"><h3>Failed to load resume</h3><p>Could not reach the server. Please try again.</p></div>';
+    }
+  }
+
+  loadResume();
+  </script>
+</body>
+</html>

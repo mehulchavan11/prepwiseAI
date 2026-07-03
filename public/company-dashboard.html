@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Dashboard | PrepWise AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background: #f1f5f9;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #0f172a;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
+
+        .sidebar-header h2 span { color: #f59e0b; }
+
+        .sidebar-header p {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .sidebar-nav {
+            padding: 16px 12px;
+            flex: 1;
+        }
+
+        .sidebar-nav a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 16px;
+            border-radius: 8px;
+            transition: all 0.15s;
+            margin-bottom: 2px;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(245, 158, 11, 0.1);
+            color: #e2e8f0;
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fff;
+        }
+
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-icon i { width: 18px; height: 18px; }
+
+        .sidebar-footer {
+            padding: 16px 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .sidebar-footer a {
+            color: #ef4444;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 16px;
+            border-radius: 8px;
+            transition: all 0.15s;
+        }
+
+        .sidebar-footer a:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 32px 40px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 22px;
+            background: #d97706;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #b45309;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .announcement-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .announcement {
+            background: #fff;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            border-left: 4px solid #d97706;
+            transition: all 0.15s;
+        }
+
+        .announcement:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+
+        .announcement h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .announcement p {
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .announcement-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .announcement small {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .delete-btn {
+            background: none;
+            border: 1.5px solid #fecaca;
+            color: #ef4444;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #fef2f2;
+            border-color: #ef4444;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .empty-state .icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: rgba(245, 158, 11, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: #d97706;
+        }
+
+        .empty-state .icon i { width: 30px; height: 30px; }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 220px; }
+            .main-content { margin-left: 220px; padding: 24px; }
+        }
+    #toast-wrap{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+    .toast{display:flex;align-items:center;gap:10px;padding:13px 18px;border-radius:10px;font-size:14px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.18);min-width:260px;max-width:380px;animation:tIn .3s ease;pointer-events:all}
+    .toast.success{background:#10b981}.toast.error{background:#ef4444}.toast.info{background:#6366f1}
+    @keyframes tIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes tOut{from{opacity:1}to{opacity:0;transform:translateX(40px)}}
+    </style>
+</head>
+<body>
+<div id="toast-wrap"></div>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Prep<span>Wise</span> AI</h2>
+            <p>Company Portal</p>
+        </div>
+        <div class="sidebar-nav">
+            <a href="#" class="active"><span class="nav-icon"><i data-lucide="megaphone"></i></span> Announcements</a>
+            <a href="compdash.html"><span class="nav-icon"><i data-lucide="users"></i></span> View Students</a>
+        </div>
+        <div class="sidebar-footer">
+            <a href="#" id="logout"><span class="nav-icon"><i data-lucide="log-out"></i></span> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Welcome, <span id="companyName">Company</span></h1>
+            <a href="create_ann.html" class="btn">+ New Announcement</a>
+        </div>
+
+        <div class="announcement-section" id="announcement-section">
+            <div class="empty-state">
+                <div class="icon"><i data-lucide="loader"></i></div>
+                <h3>Loading announcements...</h3>
+                <p>Please wait while we fetch the latest updates.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchAnnouncements() {
+            try {
+                const response = await fetch('/announcements');
+                const data = await response.json();
+                const section = document.getElementById('announcement-section');
+
+                if (data.length === 0) {
+                    section.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon"><i data-lucide="inbox"></i></div>
+                            <h3>No Announcements Yet</h3>
+                            <p>Create your first announcement to reach students across the platform.</p>
+                        </div>`;
+                    lucide.createIcons();
+                } else {
+                    section.innerHTML = data.map(announcement => `
+                        <div class="announcement">
+                            <h3>${announcement.title}</h3>
+                            <p>${announcement.content}</p>
+                            <div class="announcement-footer">
+                                <small>${new Date(announcement.createdAt).toLocaleString()}</small>
+                                <button class="delete-btn" onclick="deleteAnnouncement('${announcement._id}')">Delete</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error fetching announcements:', error);
+            }
+        }
+
+        async function deleteAnnouncement(id) {
+            if (!confirm('Are you sure you want to delete this announcement?')) return;
+            try {
+                const response = await fetch(`/announcements/${id}`, { method: 'DELETE' });
+                const data = await response.json();
+                if (response.status === 200) {
+                    showToast(data.message || 'Announcement deleted', 'success');
+                    fetchAnnouncements();
+                } else {
+                    showToast(data.message || 'Failed to delete', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting announcement:', error);
+            }
+        }
+
+        window.onload = () => {
+            const companyData = JSON.parse(localStorage.getItem('companyData') || '{}');
+            if (companyData.name) document.getElementById('companyName').textContent = companyData.name;
+            document.getElementById('logout').addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('companyData');
+                window.location.href = 'company-login.html';
+            });
+            fetchAnnouncements();
+        };
+    </script>
+    <script>
+    lucide.createIcons();
+    function showToast(msg, type='success') {
+        const wrap = document.getElementById('toast-wrap');
+        const icons = {success:'✓',error:'✕',info:'ℹ'};
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.innerHTML = `<span style="font-size:17px;flex-shrink:0">${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+        wrap.appendChild(t);
+        setTimeout(()=>{ t.style.animation='tOut .3s ease forwards'; setTimeout(()=>t.remove(),300); }, 3200);
+    }
+    </script>
+</body>
+</html>

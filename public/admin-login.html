@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | PrepWise AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            background: #0f172a;
+        }
+
+        .brand-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(245, 158, 11, 0.06) 0%, transparent 50%);
+            animation: drift 20s ease-in-out infinite;
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-2%, 2%); }
+        }
+
+        .brand-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 420px;
+        }
+
+        .brand-logo {
+            font-size: 42px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .brand-logo span { color: #f59e0b; }
+
+        .brand-tagline {
+            color: #94a3b8;
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 48px;
+        }
+
+        .brand-features { text-align: left; }
+
+        .brand-feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #34d399;
+        }
+
+        .feature-icon i { width: 20px; height: 20px; }
+
+        .feature-text h4 {
+            color: #e2e8f0;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .feature-text p {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .form-panel {
+            width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+        }
+
+        .form-header { margin-bottom: 32px; }
+
+        .form-header .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #ecfdf5;
+            color: #059669;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-header h2 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            color: #0f172a;
+            background: #f8fafc;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: #10b981;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .form-group input::placeholder { color: #94a3b8; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 13px;
+            background: #059669;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+
+        .submit-btn:hover {
+            background: #047857;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .error-message {
+            color: #e11d48;
+            text-align: center;
+            font-size: 13px;
+            margin-top: 12px;
+            padding: 10px;
+            background: #fff1f2;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .back-link a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .back-link a:hover { color: #059669; }
+
+        @media (max-width: 960px) {
+            .brand-panel { display: none; }
+            .form-panel { width: 100%; max-width: 480px; margin: 0 auto; }
+            body { background: #fff; }
+        }
+    /* ── Toast notifications ── */
+    #toast-wrap { position:fixed; top:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:10px; pointer-events:none; }
+    .toast { display:flex; align-items:center; gap:10px; padding:13px 18px; border-radius:10px; font-size:14px; font-weight:500; color:#fff; box-shadow:0 4px 20px rgba(0,0,0,.18); min-width:260px; max-width:380px; animation:tIn .3s ease; pointer-events:all; }
+    .toast.success { background:#10b981; }
+    .toast.error   { background:#ef4444; }
+    .toast.info    { background:#6366f1; }
+    .toast-icon { font-size:17px; flex-shrink:0; }
+    @keyframes tIn  { from { opacity:0; transform:translateX(40px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes tOut { from { opacity:1; } to { opacity:0; transform:translateX(40px); } }
+    </style>
+</head>
+<body>
+<div id="toast-wrap"></div>
+    <div class="brand-panel">
+        <div class="brand-content">
+            <div class="brand-logo">Prep<span>Wise</span> AI</div>
+            <p class="brand-tagline">Administration portal for managing students, announcements, and platform analytics.</p>
+            <div class="brand-features">
+                <div class="brand-feature">
+                    <div class="feature-icon"><i data-lucide="bar-chart-3"></i></div>
+                    <div class="feature-text">
+                        <h4>Student Analytics</h4>
+                        <p>Track registrations, department distribution & performance</p>
+                    </div>
+                </div>
+                <div class="brand-feature">
+                    <div class="feature-icon"><i data-lucide="megaphone"></i></div>
+                    <div class="feature-text">
+                        <h4>Announcements</h4>
+                        <p>Broadcast updates and placement news to all students</p>
+                    </div>
+                </div>
+                <div class="brand-feature">
+                    <div class="feature-icon"><i data-lucide="users"></i></div>
+                    <div class="feature-text">
+                        <h4>Student Management</h4>
+                        <p>View, edit, and manage student records across departments</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-panel">
+        <div class="form-header">
+            <div class="badge">Admin Portal</div>
+            <h2 id="form-title">Admin Login</h2>
+            <p>Access the administration dashboard</p>
+        </div>
+        <form id="admin-form">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="submit-btn">Login</button>
+        </form>
+        <div class="error-message" id="error-message"></div>
+        <div class="back-link"><a href="index.html">&larr; Back to Home</a></div>
+    </div>
+
+    <script>
+        document.getElementById('admin-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+            const errorMessage = document.getElementById('error-message');
+
+            if (response.ok) {
+                errorMessage.style.display = 'none';
+                localStorage.setItem('adminData', JSON.stringify(data.admin));
+                showToast('Login successful! Redirecting…', 'success');
+                setTimeout(() => window.location.href = './addashboard.html', 800);
+            } else {
+                errorMessage.textContent = data.message;
+                errorMessage.style.display = 'block';
+            }
+        });
+    </script>
+    <script>
+    lucide.createIcons();
+    function showToast(msg, type = 'success') {
+        const wrap = document.getElementById('toast-wrap');
+        const icons = { success: '✓', error: '✕', info: 'ℹ' };
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.innerHTML = `<span class="toast-icon">${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+        wrap.appendChild(t);
+        setTimeout(() => { t.style.animation = 'tOut .3s ease forwards'; setTimeout(() => t.remove(), 300); }, 3200);
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DSA Performance | PrepWise AI</title>
+  <style>
+  :root {
+    --primary: #6366f1;
+    --bg: #f1f5f9;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --easy: #10b981;
+    --medium: #f59e0b;
+    --hard: #ef4444;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* Header */
+  .hdr {
+    background: #0f172a; color: #fff; height: 54px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; position: sticky; top: 0; z-index: 100;
+  }
+  .hdr-brand { font-size: 16px; font-weight: 700; }
+  .hdr-brand span { color: #f59e0b; }
+  .hdr-right { display: flex; gap: 10px; align-items: center; }
+  .hdr-link {
+    text-decoration: none; color: #94a3b8; font-size: 13px; font-weight: 500;
+    padding: 6px 12px; border-radius: 8px; transition: .15s;
+  }
+  .hdr-link:hover { background: rgba(255,255,255,.08); color: #fff; }
+
+  /* Page */
+  .page { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+
+  .page-title {
+    font-size: 22px; font-weight: 700; margin-bottom: 4px;
+  }
+  .page-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+  /* Stat cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+  }
+  .stat-card .stat-val {
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-card .stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .stat-card.easy  .stat-val { color: var(--easy); }
+  .stat-card.medium .stat-val { color: var(--medium); }
+  .stat-card.hard  .stat-val { color: var(--hard); }
+  .stat-card.total .stat-val { color: var(--primary); }
+
+  /* Charts row */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 720px) { .charts-row { grid-template-columns: 1fr; } }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .chart-card h3 {
+    font-size: 14px; font-weight: 700; margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  /* Difficulty ring */
+  .ring-wrap { display: flex; align-items: center; gap: 24px; }
+  .ring-svg { flex-shrink: 0; }
+  .ring-legend { display: flex; flex-direction: column; gap: 8px; }
+  .ring-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .ring-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Bar chart for topics */
+  .bar-list { display: flex; flex-direction: column; gap: 8px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .bar-label { width: 130px; flex-shrink: 0; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { flex: 1; background: #f1f5f9; border-radius: 6px; height: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; background: var(--primary); transition: width .5s ease; }
+  .bar-count { width: 24px; text-align: right; font-weight: 600; color: var(--text); font-size: 12px; }
+
+  /* Language badges */
+  .lang-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .lang-badge {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 20px;
+    background: rgba(99,102,241,.09); color: var(--primary);
+    font-size: 13px; font-weight: 600;
+  }
+  .lang-badge span { color: var(--muted); font-weight: 400; font-size: 12px; }
+
+  /* Problem table */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .table-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+  }
+  .table-hdr h3 { font-size: 14px; font-weight: 700; }
+  .search-box {
+    padding: 7px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 13px; font-family: inherit; color: var(--text); outline: none;
+    width: 200px; background: #f8fafc;
+  }
+  .search-box:focus { border-color: var(--primary); background: #fff; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    padding: 10px 16px; text-align: left;
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .4px;
+    background: #f8fafc; border-bottom: 1px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid #f1f5f9; transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f8fafc; }
+  tbody td { padding: 12px 16px; vertical-align: middle; }
+  .qid { color: var(--muted); font-size: 12px; }
+
+  .diff-badge {
+    display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  }
+  .diff-badge.Easy   { background: rgba(16,185,129,.12); color: #059669; }
+  .diff-badge.Medium { background: rgba(245,158,11,.12);  color: #d97706; }
+  .diff-badge.Hard   { background: rgba(239,68,68,.12);   color: #dc2626; }
+
+  .solved-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    background: rgba(16,185,129,.12); color: #059669;
+  }
+
+  .topic-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chip {
+    padding: 2px 7px; border-radius: 10px; font-size: 11px;
+    background: rgba(99,102,241,.08); color: var(--primary); font-weight: 500;
+  }
+
+  .solve-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 600;
+    background: var(--primary); color: #fff; text-decoration: none;
+    border: none; cursor: pointer; transition: .15s;
+  }
+  .solve-btn:hover { background: #4f46e5; }
+
+  /* Empty / loading */
+  .empty {
+    text-align: center; padding: 60px 20px; color: var(--muted);
+  }
+  .empty .e-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .empty p { font-size: 13px; }
+  .empty a { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+  .loading {
+    text-align: center; padding: 60px; color: var(--muted); font-size: 14px;
+  }
+  .spinner {
+    width: 36px; height: 36px; border: 3px solid #e2e8f0;
+    border-top-color: var(--primary); border-radius: 50%;
+    animation: spin .7s linear infinite; margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-brand">Prep<span>Wise</span> AI</div>
+  <div class="hdr-right">
+    <a href="dsa.html" class="hdr-link">&#8592; Practice Problems</a>
+    <a href="studentdashboard.html" class="hdr-link">Dashboard</a>
+  </div>
+</div>
+
+<div class="page">
+  <div class="page-title">&#128200; My DSA Performance</div>
+  <div class="page-sub" id="sub-text">Loading your progress...</div>
+
+  <div id="main-content">
+    <div class="loading"><div class="spinner"></div>Fetching your submissions...</div>
+  </div>
+</div>
+
+<script>
+// Performance data is served by Node.js (MongoDB + local CSV) — no Render dependency.
+
+const params = new URLSearchParams(location.search);
+let username = params.get('username') || '';
+
+if (!username) {
+  try {
+    const sd = JSON.parse(localStorage.getItem('studentData') || '{}');
+    username = sd.username || '';
+  } catch(e) {}
+}
+
+if (!username) {
+  document.getElementById('main-content').innerHTML =
+    '<div class="empty"><div class="e-icon">&#128274;</div><h3>Not logged in</h3>' +
+    '<p>Please <a href="studentdashboard.html">log in</a> to view your performance.</p></div>';
+  document.getElementById('sub-text').textContent = '';
+} else {
+  loadPerformance();
+}
+
+async function loadPerformance() {
+  const mainContent = document.getElementById('main-content');
+
+  let data = null;
+  try {
+    const res = await fetch(`/api/dsa/performance/${encodeURIComponent(username)}`);
+    if (!res.ok) throw new Error('Not ok');
+    data = await res.json();
+  } catch {
+    mainContent.innerHTML = `
+      <div class="empty">
+        <div class="e-icon">&#9888;</div>
+        <h3>Could not load performance</h3>
+        <p>Please try again in a moment.<br>
+        <a href="dsa-performance.html?username=${encodeURIComponent(username)}" style="color:#6366f1">Retry</a></p>
+      </div>`;
+    return;
+  }
+
+  const problems = data.problems || [];
+  document.getElementById('sub-text').textContent =
+    problems.length ? `Showing all ${problems.length} problem${problems.length !== 1 ? 's' : ''} solved by ${username}` : '';
+
+  if (!problems.length) {
+    mainContent.innerHTML =
+      '<div class="empty"><div class="e-icon">&#128187;</div><h3>No problems solved yet</h3>' +
+      '<p>Head to <a href="dsa.html">Practice Problems</a> and start solving!</p></div>';
+    return;
+  }
+
+  renderDashboard(problems);
+}
+
+function renderDashboard(problems) {
+  // ── Aggregates ──
+  const diffCount = { Easy: 0, Medium: 0, Hard: 0 };
+  const topicCount = {};
+  const langCount  = {};
+
+  problems.forEach(p => {
+    const d = p.difficulty || 'Medium';
+    if (diffCount[d] !== undefined) diffCount[d]++;
+    else diffCount['Medium']++;
+    (p.topics || []).forEach(t => { topicCount[t] = (topicCount[t] || 0) + 1; });
+    const l = p.language || '—';
+    langCount[l] = (langCount[l] || 0) + 1;
+  });
+
+  const total = problems.length;
+  const topTopics = Object.entries(topicCount).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  const maxTopic = topTopics[0]?.[1] || 1;
+
+  // ── Donut ring ──
+  const easy = diffCount.Easy, med = diffCount.Medium, hard = diffCount.Hard;
+  const ring = buildRing(easy, med, hard, total);
+
+  // ── Language badges ──
+  const langHTML = Object.entries(langCount).sort((a,b) => b[1]-a[1]).map(([l,c]) =>
+    `<div class="lang-badge">${l} <span>${c} solved</span></div>`
+  ).join('');
+
+  // ── Topic bars ──
+  const topicBarsHTML = topTopics.map(([t,c]) =>
+    `<div class="bar-row">
+      <div class="bar-label" title="${t}">${t}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(c/maxTopic*100)}%"></div></div>
+      <div class="bar-count">${c}</div>
+    </div>`
+  ).join('') || '<p style="color:var(--muted);font-size:13px">No topic data available.</p>';
+
+  // ── Table rows ──
+  let tableRows = problems.map(p => {
+    const diff = p.difficulty || 'Medium';
+    const chips = (p.topics || []).slice(0,3).map(t => `<span class="chip">${t}</span>`).join('');
+    const date  = p.timestamp ? new Date(p.timestamp).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) : '—';
+    return `<tr data-title="${(p.title||'').toLowerCase()}" data-diff="${diff}">
+      <td><span class="qid">#${p.qid}</span></td>
+      <td style="font-weight:600">${p.title || 'Problem #'+p.qid}</td>
+      <td><span class="diff-badge ${diff}">${diff}</span></td>
+      <td><div class="topic-chips">${chips}</div></td>
+      <td><code style="font-size:12px;color:var(--muted)">${p.language || '—'}</code></td>
+      <td style="font-weight:600;color:var(--text)">${p.time_taken || '—'}</td>
+      <td>${date}</td>
+      <td><span class="solved-badge">&#10003; Solved</span></td>
+      <td><a href="dsa.html?qid=${p.qid}${username ? '&username='+encodeURIComponent(username) : ''}" class="solve-btn">Revisit</a></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('main-content').innerHTML = `
+    <!-- Stat cards -->
+    <div class="stats-grid">
+      <div class="stat-card total"><div class="stat-val">${total}</div><div class="stat-label">Total Solved</div></div>
+      <div class="stat-card easy"><div class="stat-val">${easy}</div><div class="stat-label">Easy</div></div>
+      <div class="stat-card medium"><div class="stat-val">${med}</div><div class="stat-label">Medium</div></div>
+      <div class="stat-card hard"><div class="stat-val">${hard}</div><div class="stat-label">Hard</div></div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>&#127775; Difficulty Breakdown</h3>
+        <div class="ring-wrap">
+          ${ring}
+          <div class="ring-legend">
+            <div class="ring-item"><div class="ring-dot" style="background:#10b981"></div><span style="font-weight:600">${easy}</span>&nbsp;Easy</div>
+            <div class="ring-item"><div class="ring-dot" style="background:#f59e0b"></div><span style="font-weight:600">${med}</span>&nbsp;Medium</div>
+            <div class="ring-item"><div class="ring-dot" style="background:#ef4444"></div><span style="font-weight:600">${hard}</span>&nbsp;Hard</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>&#128204; Top Topics</h3>
+        <div class="bar-list">${topicBarsHTML}</div>
+      </div>
+    </div>
+
+    <!-- Languages -->
+    <div class="chart-card" style="margin-bottom:20px;padding:20px">
+      <h3 style="margin-bottom:14px">&#128187; Languages Used</h3>
+      <div class="lang-list">${langHTML}</div>
+    </div>
+
+    <!-- Problem table -->
+    <div class="table-card">
+      <div class="table-hdr">
+        <h3>&#9989; Solved Problems</h3>
+        <input class="search-box" id="search" placeholder="Search problems..." oninput="filterTable(this.value)" />
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Title</th><th>Difficulty</th><th>Topics</th>
+              <th>Language</th><th>Time Taken</th><th>Date</th><th>Status</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="prob-tbody">${tableRows}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function filterTable(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('#prob-tbody tr').forEach(tr => {
+    const title = tr.dataset.title || '';
+    const diff  = tr.dataset.diff.toLowerCase();
+    tr.style.display = (title.includes(q) || diff.includes(q)) ? '' : 'none';
+  });
+}
+
+function buildRing(easy, med, hard, total) {
+  if (total === 0) return '<svg width="110" height="110" class="ring-svg"><circle cx="55" cy="55" r="42" fill="none" stroke="#e2e8f0" stroke-width="14"/></svg>';
+
+  const r = 42, cx = 55, cy = 55;
+  const circ = 2 * Math.PI * r;
+  const eAngle = (easy  / total) * 360;
+  const mAngle = (med   / total) * 360;
+  const hAngle = (hard  / total) * 360;
+
+  function arc(startDeg, deg, color) {
+    if (deg <= 0) return '';
+    const startR = (startDeg - 90) * Math.PI / 180;
+    const endR   = (startDeg + deg - 90) * Math.PI / 180;
+    const large  = deg > 180 ? 1 : 0;
+    const x1 = cx + r * Math.cos(startR), y1 = cy + r * Math.sin(startR);
+    const x2 = cx + r * Math.cos(endR),   y2 = cy + r * Math.sin(endR);
+    // For full circle, use two arcs
+    if (deg >= 360) {
+      return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="14"/>`;
+    }
+    return `<path d="M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}" fill="none" stroke="${color}" stroke-width="14" stroke-linecap="butt"/>`;
+  }
+
+  const s1 = 0, s2 = eAngle, s3 = eAngle + mAngle;
+  return `<svg width="110" height="110" class="ring-svg">
+    ${arc(s1, eAngle, '#10b981')}
+    ${arc(s2, mAngle, '#f59e0b')}
+    ${arc(s3, hAngle, '#ef4444')}
+    <text x="${cx}" y="${cy+2}" text-anchor="middle" dominant-baseline="middle" font-size="18" font-weight="800" fill="#0f172a">${total}</text>
+    <text x="${cx}" y="${cy+18}" text-anchor="middle" dominant-baseline="middle" font-size="9" fill="#64748b">SOLVED</text>
+  </svg>`;
+}
+</script>
+</body>
+</html>

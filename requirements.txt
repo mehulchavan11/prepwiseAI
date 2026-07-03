@@ -1,0 +1,26 @@
+# PrepWise AI — Python dependencies (FastAPI backend)
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+
+# Database
+pymongo>=4.6.0
+python-dotenv>=1.0.0
+
+# AI
+google-genai>=1.0.0
+
+# Data
+pandas>=2.0.0
+openpyxl>=3.1.0
+Pillow>=10.0.0
+PyPDF2>=3.0.0
+
+# Proctoring (face detection)
+opencv-python-headless>=4.8.0
+
+# Streamlit apps (Aptitude Quiz + Mock Interview)
+streamlit>=1.35.0
+streamlit-webrtc>=0.47.0
+av>=11.0.0
+SpeechRecognition>=3.10.0

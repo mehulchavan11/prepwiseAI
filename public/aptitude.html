@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aptitude Quiz | PrepWise AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- No JS ML library needed — face detection runs on the Python backend -->
+  <style>
+    :root {
+      --primary: #6366f1; --primary-dark: #4f46e5;
+      --bg: #f1f5f9; --surface: #fff;
+      --border: #e2e8f0; --text: #0f172a; --muted: #64748b;
+      --success: #10b981; --error: #ef4444; --warn: #f59e0b;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+    /* ── Header ── */
+    .hdr {
+      background:#0f172a; color:#fff; height:60px; padding:0 28px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:200;
+    }
+    .hdr-brand { font-size:17px; font-weight:700; }
+    .hdr-brand span { color:#f59e0b; }
+    .back-btn {
+      display:flex; align-items:center; gap:6px; color:#94a3b8;
+      text-decoration:none; font-size:13px; font-weight:500;
+      padding:7px 14px; border-radius:8px; transition:.15s;
+    }
+    .back-btn:hover { background:rgba(255,255,255,.08); color:#fff; }
+
+    /* ── Layout ── */
+    .page { max-width:760px; margin:0 auto; padding:36px 20px 80px; }
+    .card { background:var(--surface); border-radius:16px; padding:32px;
+            box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04); margin-bottom:24px; }
+
+    h1 { font-size:22px; font-weight:700; margin-bottom:4px; }
+    .sub { color:var(--muted); font-size:14px; margin-bottom:28px; }
+
+    /* ── Form controls ── */
+    .radio-group { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+    .radio-option { cursor:pointer; }
+    .radio-option input { display:none; }
+    .radio-option span {
+      display:block; padding:10px 20px; border:1.5px solid var(--border);
+      border-radius:10px; font-size:14px; font-weight:500; transition:.2s;
+    }
+    .radio-option input:checked + span { border-color:var(--primary); background:rgba(99,102,241,.07); color:var(--primary); }
+
+    /* ── Buttons ── */
+    .btn {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:11px 24px; background:var(--primary); color:#fff;
+      border:none; border-radius:10px; font-size:14px; font-weight:600;
+      font-family:'Inter',sans-serif; cursor:pointer; transition:.2s; text-decoration:none;
+    }
+    .btn:hover { background:var(--primary-dark); transform:translateY(-1px); box-shadow:0 4px 14px rgba(99,102,241,.3); }
+    .btn:disabled { opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
+    .btn-ghost { background:transparent; color:var(--primary); border:1.5px solid var(--primary); }
+    .btn-ghost:hover { background:rgba(99,102,241,.06); box-shadow:none; }
+    .btn-danger { background:var(--error); }
+    .btn-danger:hover { background:#dc2626; box-shadow:0 4px 14px rgba(239,68,68,.3); }
+    .btn-success { background:var(--success); }
+    .btn-success:hover { background:#059669; box-shadow:0 4px 14px rgba(16,185,129,.3); }
+    .btn-row { display:flex; gap:12px; flex-wrap:wrap; margin-top:24px; }
+
+    /* ── Quiz header bar ── */
+    .quiz-hdr {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:24px;
+    }
+    .timer {
+      display:flex; align-items:center; gap:6px; font-size:15px; font-weight:600;
+      color:var(--primary); background:rgba(99,102,241,.08);
+      padding:8px 16px; border-radius:10px;
+    }
+    .progress-bar { height:6px; background:#e2e8f0; border-radius:99px; margin-bottom:24px; overflow:hidden; }
+    .progress-fill { height:100%; background:var(--primary); border-radius:99px; transition:.3s; }
+
+    /* ── Question card ── */
+    .q-label { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:12px; }
+    .q-text { font-size:16px; font-weight:500; line-height:1.7; margin-bottom:20px; }
+    .q-img { max-width:100%; border-radius:8px; margin-bottom:16px; }
+    .option {
+      display:flex; align-items:center; gap:14px; padding:14px 18px;
+      border:1.5px solid var(--border); border-radius:10px; cursor:pointer; margin-bottom:10px; transition:.2s;
+    }
+    .option:hover { border-color:var(--primary); background:rgba(99,102,241,.04); }
+    .option.selected { border-color:var(--primary); background:rgba(99,102,241,.08); }
+    .option.correct { border-color:var(--success); background:rgba(16,185,129,.07); }
+    .option.wrong   { border-color:var(--error);   background:rgba(239,68,68,.07); }
+    .option .letter {
+      width:32px; height:32px; border-radius:8px; background:var(--border);
+      display:flex; align-items:center; justify-content:center;
+      font-size:13px; font-weight:700; flex-shrink:0; transition:.2s;
+    }
+    .option.selected .letter { background:var(--primary); color:#fff; }
+    .option.correct  .letter { background:var(--success); color:#fff; }
+    .option.wrong    .letter { background:var(--error);   color:#fff; }
+
+    /* ── Q-nav dots ── */
+    .q-nav { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px; }
+    .q-dot {
+      width:32px; height:32px; border-radius:8px; border:1.5px solid var(--border);
+      background:var(--surface); font-size:12px; font-weight:600; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; transition:.15s;
+    }
+    .q-dot:hover { border-color:var(--primary); color:var(--primary); }
+    .q-dot.current { border-color:var(--primary); background:var(--primary); color:#fff; }
+    .q-dot.answered { border-color:var(--success); background:rgba(16,185,129,.1); color:var(--success); }
+
+    /* ── Results ── */
+    .score-ring {
+      width:120px; height:120px; border-radius:50%; display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      border:6px solid var(--primary); margin:0 auto 24px;
+    }
+    .score-ring .big { font-size:28px; font-weight:700; color:var(--primary); }
+    .score-ring .sm  { font-size:12px; color:var(--muted); }
+    .result-item { padding:16px; border-radius:12px; border:1.5px solid var(--border); margin-bottom:12px; }
+    .result-item.correct-ans { border-color:rgba(16,185,129,.4); background:rgba(16,185,129,.04); }
+    .result-item.wrong-ans   { border-color:rgba(239,68,68,.4);  background:rgba(239,68,68,.04);  }
+    .result-item .q-num { font-size:11px; color:var(--muted); font-weight:600; margin-bottom:6px; }
+    .result-item .q-body { font-size:14px; font-weight:500; margin-bottom:10px; }
+    .badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+    .badge-success { background:rgba(16,185,129,.12); color:#059669; }
+    .badge-error   { background:rgba(239,68,68,.12);  color:#dc2626; }
+    .explanation { margin-top:10px; padding:10px 14px; background:#f8fafc; border-radius:8px; font-size:13px; color:var(--muted); line-height:1.6; }
+
+    /* ── Webcam panel (fixed bottom-right) ── */
+    #webcam-panel {
+      position:fixed; bottom:24px; right:24px; z-index:300;
+      background:#0f172a; border-radius:14px; overflow:hidden;
+      box-shadow:0 8px 32px rgba(0,0,0,.35);
+      display:none; flex-direction:column; width:210px;
+    }
+    #webcam-panel video { width:210px; height:158px; object-fit:cover; display:block; }
+    #webcam-panel .panel-info {
+      padding:6px 12px; color:#94a3b8; font-size:11px; font-weight:500;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    #webcam-panel .panel-info .dot {
+      width:7px; height:7px; border-radius:50%; background:#22c55e;
+      box-shadow:0 0 6px #22c55e; animation:blink 1.5s infinite; flex-shrink:0;
+    }
+    .viol-counter {
+      font-size:12px; font-weight:700; color:#fbbf24;
+      background:rgba(251,191,36,.1); border-radius:6px; padding:2px 8px;
+    }
+    .viol-counter.danger { color:#ef4444; background:rgba(239,68,68,.15); animation:pulse .6s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+    @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .violation-badge {
+      position:absolute; top:0; left:0; right:0; text-align:center;
+      background:rgba(239,68,68,.92); color:#fff; font-size:11px; font-weight:700;
+      padding:5px 8px; display:none; letter-spacing:.3px;
+    }
+
+    /* ── Termination overlay ── */
+    #terminate-overlay {
+      display:none; position:fixed; inset:0; z-index:9999;
+      background:#0f172a; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; padding:32px;
+    }
+    #terminate-overlay .t-icon { font-size:64px; margin-bottom:20px; }
+    #terminate-overlay h1 { font-size:28px; font-weight:700; color:#ef4444; margin-bottom:12px; }
+    #terminate-overlay p  { font-size:15px; color:#94a3b8; max-width:460px; line-height:1.7; margin-bottom:8px; }
+    #terminate-overlay .t-countdown { font-size:13px; color:#64748b; margin-top:16px; }
+
+    /* ── Loading overlay ── */
+    #loading {
+      display:none; position:fixed; inset:0; background:rgba(241,245,249,.9);
+      z-index:999; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+    }
+    .spinner {
+      width:48px; height:48px; border:4px solid var(--border);
+      border-top-color:var(--primary); border-radius:50%; animation:spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── Screens ── */
+    .screen { display:none; }
+    .screen.active { display:block; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hdr">
+  <div class="hdr-brand">Prep<span>Wise</span> AI</div>
+  <a href="studentdashboard.html" class="back-btn">← Back to Dashboard</a>
+</div>
+
+<!-- Loading overlay -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p style="color:var(--muted);font-size:14px;font-weight:500" id="loading-msg">Loading questions…</p>
+</div>
+
+<!-- Termination overlay -->
+<div id="terminate-overlay">
+  <div class="t-icon">🚫</div>
+  <h1>Test Terminated</h1>
+  <p>You were removed from the screen <strong>5 times</strong> during the test.<br>This incident has been <strong style="color:#ef4444">reported to the admin</strong>.</p>
+  <p style="font-size:13px;color:#475569">Proctoring violations: No face detected / Multiple people detected / Tab switched</p>
+  <div class="t-countdown" id="t-countdown">Redirecting to dashboard in 5 seconds…</div>
+</div>
+
+<!-- Webcam panel -->
+<div id="webcam-panel">
+  <div class="violation-badge" id="violation-badge">⚠ No Face Detected</div>
+  <video id="webcam-video" autoplay muted playsinline></video>
+  <div class="panel-info">
+    <div style="display:flex;align-items:center;gap:5px"><div class="dot"></div><span>Proctoring</span></div>
+    <div class="viol-counter" id="viol-counter">0 / 5</div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ═══════════════════════════════════════ SETUP SCREEN ════════════ -->
+  <div id="setup-screen" class="screen active">
+    <div class="card">
+      <h1>Aptitude Quiz</h1>
+      <p class="sub" id="setup-user">Logged in as: <strong>—</strong></p>
+
+      <p style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted)">CATEGORY</p>
+      <div class="radio-group" id="category-group">
+        <label class="radio-option"><input type="radio" name="category" value="General" checked><span>General</span></label>
+        <label class="radio-option"><input type="radio" name="category" value="Technical"><span>Technical</span></label>
+      </div>
+
+      <p style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted)">TEST MODE</p>
+      <div class="radio-group" id="mode-group">
+        <label class="radio-option"><input type="radio" name="mode" value="10" checked><span>⚡ Quick Challenge (10 Q)</span></label>
+        <label class="radio-option"><input type="radio" name="mode" value="30"><span>🏆 Full Test (30 Q)</span></label>
+      </div>
+
+      <!-- Camera preview & face status -->
+      <div id="cam-setup-wrap" style="margin-top:16px;margin-bottom:16px;display:none">
+        <div style="position:relative;width:260px;border-radius:10px;overflow:hidden;background:#0f172a;margin:0 auto">
+          <video id="setup-video" autoplay muted playsinline style="width:260px;height:195px;object-fit:cover;display:block"></video>
+          <div id="face-status-bar" style="padding:6px 12px;text-align:center;font-size:12px;font-weight:700"></div>
+        </div>
+      </div>
+      <div id="cam-loading" style="font-size:13px;color:var(--muted);margin-bottom:16px">
+        ⏳ Initialising camera &amp; face detection…
+      </div>
+      <button class="btn" id="start-btn" disabled style="opacity:.5;cursor:not-allowed">Start Quiz →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ QUIZ SCREEN ════════════ -->
+  <div id="quiz-screen" class="screen">
+    <div class="quiz-hdr">
+      <div>
+        <div style="font-size:13px;color:var(--muted)">Question <strong id="q-current">1</strong> of <strong id="q-total">10</strong></div>
+      </div>
+      <div class="timer"><i data-lucide="clock" style="width:16px;height:16px"></i><span id="timer-display">00:00</span></div>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+    <!-- Q-nav dots -->
+    <div class="q-nav" id="q-nav"></div>
+
+    <div class="card" style="margin-bottom:0">
+      <div class="q-label" id="q-label">Question 1</div>
+      <div class="q-text" id="q-text"></div>
+      <img id="q-img" class="q-img" style="display:none" />
+      <div id="options-container"></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="prev-btn">← Prev</button>
+        <button class="btn" id="next-btn">Next →</button>
+        <button class="btn btn-success" id="submit-btn" style="display:none">Submit Test</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════ RESULTS SCREEN ════════════ -->
+  <div id="results-screen" class="screen">
+    <div class="card" style="text-align:center">
+      <h1 style="margin-bottom:4px">Quiz Complete! 🎉</h1>
+      <p class="sub" id="result-sub">Here are your results</p>
+      <div class="score-ring">
+        <span class="big" id="score-big">—</span>
+        <span class="sm">Score</span>
+      </div>
+      <div style="display:flex;gap:24px;justify-content:center;font-size:14px;color:var(--muted);margin-bottom:24px">
+        <span>⏱ <strong id="time-taken">—</strong></span>
+        <span>✅ <strong id="correct-count">—</strong> Correct</span>
+        <span>❌ <strong id="wrong-count">—</strong> Wrong</span>
+      </div>
+      <div class="btn-row" style="justify-content:center">
+        <button class="btn" id="try-again-btn">Try Again</button>
+        <a href="studentdashboard.html" class="btn btn-ghost">← Dashboard</a>
+      </div>
+    </div>
+
+    <div id="review-container"></div>
+  </div>
+
+</div><!-- end .page -->
+
+<script>
+let API = '';
+let PROCTOR_API = '';
+const configReady = fetch('/config').then(r => r.json()).then(c => { API = PROCTOR_API = c.pythonApiUrl || ''; }).catch(() => {});
+
+async function waitForServer() {
+  await configReady;
+  if (!API) return;
+  for (let i = 0; i < 12; i++) {
+    try { const r = await fetch(`${API}/`, { signal: AbortSignal.timeout(8000) }); if (r.ok) return; } catch {}
+  }
+}
+const serverReady = waitForServer();
+
+const sd = JSON.parse(localStorage.getItem('studentData') || '{}');
+const username = new URLSearchParams(location.search).get('username') || sd.username || '';
+
+let state = {
+  questions: [], userAnswers: [], currentIdx: 0,
+  startTime: null, timerInterval: null,
+  category: 'General', count: 10,
+  violationCount: 0,
+  violationLog: [],    // [{type, time}]
+  terminated: false,
+};
+// Face detection via Python API — no client-side ML needed
+let procInterval = null;
+
+// ── Setup ──
+document.querySelector('#setup-user strong').textContent = username || 'Guest';
+document.getElementById('start-btn').addEventListener('click', startQuiz);
+document.getElementById('prev-btn').addEventListener('click', () => navigate(-1));
+document.getElementById('next-btn').addEventListener('click', () => navigate(1));
+document.getElementById('submit-btn').addEventListener('click', submitQuiz);
+document.getElementById('try-again-btn').addEventListener('click', resetQuiz);
+
+lucide.createIcons();
+initCameraOnLoad(); // start camera + face detection on page load
+
+async function startQuiz() {
+  await serverReady;
+  state.category = document.querySelector('input[name="category"]:checked').value;
+  state.count    = parseInt(document.querySelector('input[name="mode"]:checked').value);
+
+  showLoading('Loading questions…');
+  try {
+    const res = await fetch(`${API}/api/aptitude/questions?category=${state.category}&count=${state.count}`);
+    if (!res.ok) throw new Error('Failed to load questions');
+    state.questions   = await res.json();
+    state.userAnswers = new Array(state.questions.length).fill(null);
+  } catch (e) {
+    hideLoading();
+    alert('Failed to load questions. Make sure the API server is running.');
+    return;
+  }
+
+  await setupCamera(); // transfer stream to quiz panel, start detection interval
+
+  hideLoading();
+  showScreen('quiz-screen');
+  renderQuestion();
+  startTimer();
+  buildNavDots();
+  lucide.createIcons();
+}
+
+// ── Camera & proctoring (Python MediaPipe backend) ──
+let setupStream = null;
+let setupCheckInterval = null;
+
+// Capture one JPEG frame from a video element and POST to /api/proctor/detect
+async function detectFaces(videoEl) {
+  if (!videoEl || !videoEl.readyState || videoEl.readyState < 2) return -1;
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width  = videoEl.videoWidth  || 320;
+    canvas.height = videoEl.videoHeight || 240;
+    canvas.getContext('2d').drawImage(videoEl, 0, 0);
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.7));
+    const form = new FormData();
+    form.append('file', blob, 'frame.jpg');
+    const res = await fetch(`${PROCTOR_API}/api/proctor/detect`, { method: 'POST', body: form });
+    if (!res.ok) return -1;
+    const data = await res.json();
+    return data.faces ?? -1;
+  } catch { return -1; }
+}
+
+async function initCameraOnLoad() {
+  const camLoading = document.getElementById('cam-loading');
+  const camWrap    = document.getElementById('cam-setup-wrap');
+  const setupVideo = document.getElementById('setup-video');
+  const startBtn   = document.getElementById('start-btn');
+
+  // 1. Get camera
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+  } catch {
+    camLoading.innerHTML = '⚠ Camera access denied. Proctoring disabled — you may still take the quiz.';
+    startBtn.disabled = false; startBtn.style.opacity = '1'; startBtn.style.cursor = 'pointer';
+    return;
+  }
+  setupStream = stream;
+  setupVideo.srcObject = stream;
+  camWrap.style.display = 'block';
+  camLoading.textContent = '⏳ Connecting to face detection…';
+
+  // 2. Wait for server then check face detection
+  await new Promise(r => setTimeout(r, 800)); // let video stabilise
+  camLoading.textContent = '⏳ Waiting for server…';
+  await serverReady;
+  const warmup = await detectFaces(setupVideo);
+  if (warmup === -1) {
+    camLoading.innerHTML = '⚠ Face detection unavailable. You may still proceed with the quiz.';
+    startBtn.disabled = false; startBtn.style.opacity = '1'; startBtn.style.cursor = 'pointer';
+    return;
+  }
+  camLoading.style.display = 'none';
+
+  // 3. Live face-check loop on setup screen
+  setupCheckInterval = setInterval(async () => {
+    const bar = document.getElementById('face-status-bar');
+    const n   = await detectFaces(setupVideo);
+    if (n === -1) return; // API busy — skip this tick
+
+    if (n === 1) {
+      bar.textContent = '✓ Face detected — ready to start';
+      bar.style.background = 'rgba(16,185,129,.85)'; bar.style.color = '#fff';
+      startBtn.disabled = false; startBtn.style.opacity = '1'; startBtn.style.cursor = 'pointer';
+    } else if (n === 0) {
+      bar.textContent = '✗ No face detected — please look at the camera';
+      bar.style.background = 'rgba(239,68,68,.85)'; bar.style.color = '#fff';
+      startBtn.disabled = true; startBtn.style.opacity = '.5'; startBtn.style.cursor = 'not-allowed';
+    } else {
+      bar.textContent = `✗ ${n} faces detected — only one person allowed`;
+      bar.style.background = 'rgba(245,158,11,.9)'; bar.style.color = '#fff';
+      startBtn.disabled = true; startBtn.style.opacity = '.5'; startBtn.style.cursor = 'not-allowed';
+    }
+  }, 1500);
+}
+
+async function setupCamera() {
+  if (setupCheckInterval) { clearInterval(setupCheckInterval); setupCheckInterval = null; }
+  const panel = document.getElementById('webcam-panel');
+  const video = document.getElementById('webcam-video');
+  if (setupStream) {
+    video.srcObject = setupStream;
+    panel.style.display = 'flex';
+    procInterval = setInterval(runDetection, 1500);
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    video.srcObject = stream;
+    panel.style.display = 'flex';
+    procInterval = setInterval(runDetection, 1500);
+  } catch { /* proctoring unavailable */ }
+}
+
+async function runDetection() {
+  if (state.terminated) return;
+  const video   = document.getElementById('webcam-video');
+  const badge   = document.getElementById('violation-badge');
+  const counter = document.getElementById('viol-counter');
+
+  const n = await detectFaces(video);
+  if (n === -1) return; // API error — skip tick, don't penalise student
+
+  let violationType = null;
+  if (n === 0)    violationType = 'No Face Detected';
+  else if (n > 1) violationType = 'Multiple Faces Detected';
+
+  if (violationType) {
+    badge.textContent = `⚠ ${violationType}`;
+    badge.style.display = 'block';
+    state.violationCount++;
+    state.violationLog.push({ type: violationType, time: new Date().toISOString() });
+    counter.textContent = `${state.violationCount} / 5`;
+    counter.className = 'viol-counter' + (state.violationCount >= 3 ? ' danger' : '');
+    if (username) {
+      fetch(`${API}/api/aptitude/log-violation`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, violation: violationType }),
+      }).catch(() => {});
+    }
+    if (state.violationCount >= 5) terminateTest();
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function isQuizProctoringActive() {
+  return !state.terminated && procInterval !== null;
+}
+
+function recordTabSwitchViolation() {
+  if (!isQuizProctoringActive()) return;
+
+  const violationType = 'Tab Switched';
+  const badge   = document.getElementById('violation-badge');
+  const counter = document.getElementById('viol-counter');
+
+  badge.textContent = `Violation: ${violationType}`;
+  badge.style.display = 'block';
+  state.violationCount++;
+  state.violationLog.push({ type: violationType, time: new Date().toISOString() });
+  counter.textContent = `${state.violationCount} / 5`;
+  counter.className = 'viol-counter' + (state.violationCount >= 3 ? ' danger' : '');
+
+  if (username) {
+    fetch(`${API}/api/aptitude/log-violation`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, violation: violationType }),
+    }).catch(() => {});
+  }
+
+  if (state.violationCount >= 5) terminateTest();
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) recordTabSwitchViolation();
+});
+
+async function terminateTest() {
+  if (state.terminated) return;
+  state.terminated = true;
+
+  clearInterval(procInterval); procInterval = null;
+  clearInterval(state.timerInterval);
+  stopCamera();
+
+  // Report to backend
+  if (username) {
+    fetch(`${API}/api/aptitude/terminate`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username,
+        category: state.category,
+        violation_count: state.violationCount,
+        violations: state.violationLog,
+      }),
+    }).catch(() => {});
+  }
+
+  // Show termination screen with countdown
+  document.getElementById('terminate-overlay').style.display = 'flex';
+  let secs = 5;
+  const cd = document.getElementById('t-countdown');
+  const tick = setInterval(() => {
+    secs--;
+    cd.textContent = `Redirecting to dashboard in ${secs} second${secs !== 1 ? 's' : ''}…`;
+    if (secs <= 0) { clearInterval(tick); window.location.href = 'studentdashboard.html'; }
+  }, 1000);
+}
+
+function stopCamera() {
+  if (procInterval) { clearInterval(procInterval); procInterval = null; }
+  const video = document.getElementById('webcam-video');
+  if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+  document.getElementById('webcam-panel').style.display = 'none';
+}
+
+// ── Timer ──
+function startTimer() {
+  state.startTime = Date.now();
+  state.timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+    const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    const s = String(elapsed % 60).padStart(2, '0');
+    document.getElementById('timer-display').textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(state.timerInterval);
+  return Math.floor((Date.now() - state.startTime) / 1000);
+}
+
+// ── Question rendering ──
+function renderQuestion() {
+  const q = state.questions[state.currentIdx];
+  const total = state.questions.length;
+
+  document.getElementById('q-current').textContent = state.currentIdx + 1;
+  document.getElementById('q-total').textContent   = total;
+  document.getElementById('q-label').textContent   = `Question ${state.currentIdx + 1}`;
+  document.getElementById('q-text').textContent    = q.question_text;
+  document.getElementById('progress-fill').style.width = `${((state.currentIdx + 1) / total) * 100}%`;
+
+  const img = document.getElementById('q-img');
+  if (q.image_data) { img.src = q.image_data; img.style.display = 'block'; }
+  else { img.style.display = 'none'; }
+
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+  Object.entries(q.labeled_options).forEach(([label, text]) => {
+    const div = document.createElement('div');
+    div.className = 'option' + (state.userAnswers[state.currentIdx] === label ? ' selected' : '');
+    div.innerHTML = `<div class="letter">${label}</div><div style="font-size:14px">${text}</div>`;
+    div.addEventListener('click', () => {
+      state.userAnswers[state.currentIdx] = label;
+      updateNavDot(state.currentIdx, 'answered');
+      renderQuestion();
+    });
+    container.appendChild(div);
+  });
+
+  const isLast = state.currentIdx === total - 1;
+  document.getElementById('next-btn').style.display   = isLast ? 'none' : '';
+  document.getElementById('submit-btn').style.display = isLast ? '' : 'none';
+  document.getElementById('prev-btn').disabled = state.currentIdx === 0;
+
+  updateNavDot(state.currentIdx, 'current');
+}
+
+function navigate(dir) {
+  const next = state.currentIdx + dir;
+  if (next >= 0 && next < state.questions.length) {
+    updateNavDot(state.currentIdx, state.userAnswers[state.currentIdx] ? 'answered' : '');
+    state.currentIdx = next;
+    renderQuestion();
+  }
+}
+
+// ── Nav dots ──
+function buildNavDots() {
+  const nav = document.getElementById('q-nav');
+  nav.innerHTML = '';
+  state.questions.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'q-dot';
+    dot.textContent = i + 1;
+    dot.id = `dot-${i}`;
+    dot.addEventListener('click', () => {
+      updateNavDot(state.currentIdx, state.userAnswers[state.currentIdx] ? 'answered' : '');
+      state.currentIdx = i;
+      renderQuestion();
+    });
+    nav.appendChild(dot);
+  });
+  updateNavDot(0, 'current');
+}
+
+function updateNavDot(i, status) {
+  const dot = document.getElementById(`dot-${i}`);
+  if (!dot) return;
+  dot.className = 'q-dot' + (status ? ` ${status}` : '');
+}
+
+// ── Submit ──
+async function submitQuiz() {
+  const timeSec = stopTimer();
+  stopCamera();
+
+  const score = state.questions.reduce((acc, q, i) => acc + (state.userAnswers[i] === q.correct_answer ? 1 : 0), 0);
+  const total  = state.questions.length;
+  const mins   = Math.floor(timeSec / 60), secs = timeSec % 60;
+
+  // Save to DB (non-blocking)
+  if (username) {
+    fetch(`${API}/api/aptitude/submit`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, category: state.category, score, total, time_taken: timeSec }),
+    }).catch(() => {});
+  }
+
+  // Render results
+  document.getElementById('score-big').textContent    = `${score}/${total}`;
+  document.getElementById('time-taken').textContent   = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+  document.getElementById('correct-count').textContent = score;
+  document.getElementById('wrong-count').textContent   = total - score;
+  document.getElementById('result-sub').textContent   = `${state.category} • ${state.count}-Question ${score >= total*0.7 ? '🌟 Great job!' : 'Keep practicing!'}`;
+
+  const reviewContainer = document.getElementById('review-container');
+  reviewContainer.innerHTML = '<h2 style="font-size:18px;font-weight:700;margin-bottom:16px">Review Answers</h2>';
+  state.questions.forEach((q, i) => {
+    const userAns = state.userAnswers[i];
+    const correct = q.correct_answer;
+    const isRight = userAns === correct;
+
+    const div = document.createElement('div');
+    div.className = `result-item ${isRight ? 'correct-ans' : 'wrong-ans'}`;
+    div.innerHTML = `
+      <div class="q-num">Q${i + 1}</div>
+      <div class="q-body">${q.question_text}</div>
+      ${q.image_data ? `<img src="${q.image_data}" style="max-width:100%;border-radius:8px;margin-bottom:10px">` : ''}
+      <div style="display:flex;gap:10px;margin-bottom:8px;font-size:13px">
+        <span>Your: <strong>${userAns ? q.labeled_options[userAns] || userAns : 'Not answered'}</strong></span>
+        <span class="badge ${isRight ? 'badge-success' : 'badge-error'}">${isRight ? '✓ Correct' : '✗ Wrong'}</span>
+      </div>
+      ${!isRight ? `<div style="font-size:13px;color:var(--success)">Correct: <strong>${q.labeled_options[correct] || correct}</strong></div>` : ''}
+      <div class="explanation"><strong>Explanation:</strong> ${q.explanation}</div>`;
+    reviewContainer.appendChild(div);
+  });
+
+  showScreen('results-screen');
+}
+
+function resetQuiz() {
+  state = { questions:[], userAnswers:[], currentIdx:0, startTime:null,
+            timerInterval:null, category:'General', count:10,
+            violationCount:0, violationLog:[], terminated:false };
+  setupStream = null;
+  document.getElementById('viol-counter').textContent = '0 / 5';
+  document.getElementById('viol-counter').className = 'viol-counter';
+  document.getElementById('violation-badge').style.display = 'none';
+  showScreen('setup-screen');
+}
+
+// ── Utilities ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showLoading(msg) {
+  document.getElementById('loading-msg').textContent = msg;
+  document.getElementById('loading').style.display = 'flex';
+}
+function hideLoading() {
+  document.getElementById('loading').style.display = 'none';
+}
+</script>
+</body>
+</html>

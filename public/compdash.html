@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Students | PrepWise AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background: #f1f5f9;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 260px;
+            background: #0f172a;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+        .sidebar-header {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .sidebar-header h2 { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+        .sidebar-header h2 span { color: #f59e0b; }
+        .sidebar-header p { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .sidebar-nav { padding: 16px 12px; flex: 1; }
+        .sidebar-nav a {
+            color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 16px; border-radius: 8px; transition: all 0.15s; margin-bottom: 2px;
+        }
+        .sidebar-nav a:hover { background: rgba(245,158,11,0.1); color: #e2e8f0; }
+        .sidebar-nav a.active { background: rgba(245,158,11,0.15); color: #fff; }
+        .nav-icon { width: 20px; display: flex; align-items: center; justify-content: center; }
+        .nav-icon i { width: 18px; height: 18px; }
+        .sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-footer a {
+            color: #ef4444; text-decoration: none; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 16px; border-radius: 8px; transition: all 0.15s;
+        }
+        .sidebar-footer a:hover { background: rgba(239,68,68,0.1); }
+
+        /* ── Main ── */
+        .main-content { margin-left: 260px; flex: 1; padding: 32px 40px; }
+
+        .page-header { margin-bottom: 28px; }
+        .page-header h1 { font-size: 24px; font-weight: 700; color: #0f172a; }
+        .page-header p { color: #64748b; font-size: 14px; margin-top: 4px; }
+
+        /* ── Stats ── */
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+        .stat-card {
+            background: #fff; border-radius: 14px; padding: 20px 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            display: flex; align-items: center; gap: 16px;
+        }
+        .stat-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.15);
+            display: flex; align-items: center; justify-content: center; color: #d97706; flex-shrink: 0;
+        }
+        .stat-icon i { width: 20px; height: 20px; }
+        .stat-val { font-size: 26px; font-weight: 700; color: #0f172a; line-height: 1; }
+        .stat-label { font-size: 12px; color: #64748b; margin-top: 3px; }
+
+        /* ── Filters ── */
+        .filters-bar {
+            background: #fff; border-radius: 14px; padding: 18px 22px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+        .filters-bar input[type="text"] {
+            flex: 1; min-width: 180px;
+            padding: 9px 14px; border: 1.5px solid #e2e8f0; border-radius: 9px;
+            font-size: 14px; font-family: 'Inter', sans-serif; color: #0f172a;
+            background: #f8fafc; outline: none; transition: all 0.2s;
+        }
+        .filters-bar input[type="text"]:focus { border-color: #f59e0b; background: #fff; box-shadow: 0 0 0 3px rgba(245,158,11,0.1); }
+        .filters-bar select {
+            padding: 9px 14px; border: 1.5px solid #e2e8f0; border-radius: 9px;
+            font-size: 14px; font-family: 'Inter', sans-serif; color: #374151;
+            background: #f8fafc; outline: none; cursor: pointer; transition: all 0.2s;
+        }
+        .filters-bar select:focus { border-color: #f59e0b; background: #fff; }
+        .filter-label { font-size: 13px; font-weight: 500; color: #64748b; white-space: nowrap; }
+        .filter-divider { width: 1px; height: 28px; background: #e2e8f0; }
+
+        /* ── Table ── */
+        .table-wrap {
+            background: #fff; border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: #f8fafc; border-bottom: 2px solid #e2e8f0; }
+        thead th {
+            padding: 13px 18px; text-align: left;
+            font-size: 12px; font-weight: 600; color: #64748b;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        thead th.sortable { cursor: pointer; user-select: none; }
+        thead th.sortable:hover { color: #d97706; }
+        thead th .sort-icon { margin-left: 4px; opacity: 0.5; font-size: 11px; }
+        thead th.sorted .sort-icon { opacity: 1; color: #d97706; }
+        tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.1s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #fafbff; }
+        tbody td { padding: 14px 18px; font-size: 14px; color: #374151; vertical-align: middle; }
+
+        .avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700; color: #fff;
+            flex-shrink: 0;
+        }
+        .student-cell { display: flex; align-items: center; gap: 12px; }
+        .student-name { font-weight: 600; color: #0f172a; font-size: 14px; }
+        .student-email { font-size: 12px; color: #94a3b8; }
+
+        .dept-badge {
+            display: inline-block; padding: 3px 10px;
+            background: rgba(99,102,241,0.08); color: #6366f1;
+            border-radius: 20px; font-size: 12px; font-weight: 600;
+        }
+
+        .cgpa-val { font-weight: 600; color: #0f172a; }
+        .cgpa-na { color: #94a3b8; font-size: 13px; }
+        .cgpa-bar-wrap { width: 80px; height: 5px; background: #f1f5f9; border-radius: 3px; margin-top: 4px; }
+        .cgpa-bar { height: 5px; border-radius: 3px; background: linear-gradient(90deg, #f59e0b, #d97706); }
+
+        .btn-resume {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; background: rgba(245,158,11,0.1);
+            color: #d97706; border: 1px solid rgba(245,158,11,0.25);
+            border-radius: 8px; font-size: 13px; font-weight: 600;
+            font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s;
+            text-decoration: none;
+        }
+        .btn-resume:hover { background: #d97706; color: #fff; border-color: #d97706; }
+        .btn-resume i { width: 14px; height: 14px; }
+        .btn-resume-disabled {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; background: #f8fafc; color: #94a3b8;
+            border: 1px solid #e2e8f0; border-radius: 8px;
+            font-size: 13px; font-weight: 500; font-family: 'Inter', sans-serif;
+            cursor: not-allowed;
+        }
+
+        .empty-table {
+            text-align: center; padding: 60px 20px; color: #64748b;
+        }
+        .empty-table i { width: 40px; height: 40px; color: #cbd5e1; margin-bottom: 12px; }
+        .empty-table p { font-size: 14px; }
+
+        /* ── Toast ── */
+        #toast-wrap { position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none; }
+        .toast { display:flex;align-items:center;gap:10px;padding:13px 18px;border-radius:10px;font-size:14px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.18);min-width:260px;max-width:380px;animation:tIn .3s ease;pointer-events:all; }
+        .toast.success{background:#10b981}.toast.error{background:#ef4444}.toast.info{background:#6366f1}
+        @keyframes tIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes tOut{from{opacity:1}to{opacity:0;transform:translateX(40px)}}
+
+        @media (max-width: 768px) {
+            .sidebar { width: 220px; }
+            .main-content { margin-left: 220px; padding: 24px; }
+            .stats-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="toast-wrap"></div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Prep<span>Wise</span> AI</h2>
+            <p>Company Portal</p>
+        </div>
+        <div class="sidebar-nav">
+            <a href="company-dashboard.html"><span class="nav-icon"><i data-lucide="megaphone"></i></span> Announcements</a>
+            <a href="compdash.html" class="active"><span class="nav-icon"><i data-lucide="users"></i></span> View Students</a>
+        </div>
+        <div class="sidebar-footer">
+            <a href="#" id="logout"><span class="nav-icon"><i data-lucide="log-out"></i></span> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Student Talent Pool</h1>
+            <p>Browse and filter all registered students</p>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="users"></i></div>
+                <div>
+                    <div class="stat-val" id="stat-total">—</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="file-text"></i></div>
+                <div>
+                    <div class="stat-val" id="stat-resumes">—</div>
+                    <div class="stat-label">Resumes Uploaded</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="bar-chart-2"></i></div>
+                <div>
+                    <div class="stat-val" id="stat-avgcgpa">—</div>
+                    <div class="stat-label">Average CGPA</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filters-bar">
+            <i data-lucide="search" style="width:16px;height:16px;color:#94a3b8;flex-shrink:0"></i>
+            <input type="text" id="searchInput" placeholder="Search by name or email…" oninput="applyFilters()">
+            <div class="filter-divider"></div>
+            <span class="filter-label">Department</span>
+            <select id="deptFilter" onchange="applyFilters()">
+                <option value="">All Departments</option>
+                <option value="COMPS">COMPS</option>
+                <option value="IT">IT</option>
+                <option value="EXTC">EXTC</option>
+                <option value="MECH">MECH</option>
+                <option value="CIVIL">CIVIL</option>
+                <option value="AI&DS">AI&DS</option>
+            </select>
+            <div class="filter-divider"></div>
+            <span class="filter-label">CGPA Sort</span>
+            <select id="cgpaSort" onchange="applyFilters()">
+                <option value="">Default</option>
+                <option value="asc">CGPA ↑ Low to High</option>
+                <option value="desc">CGPA ↓ High to Low</option>
+            </select>
+            <div class="filter-divider"></div>
+            <span class="filter-label">Has Resume</span>
+            <select id="resumeFilter" onchange="applyFilters()">
+                <option value="">All</option>
+                <option value="yes">With Resume</option>
+                <option value="no">Without Resume</option>
+            </select>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Department</th>
+                        <th>Gender</th>
+                        <th class="sortable sorted" id="th-cgpa" onclick="toggleCgpaSort()">
+                            CGPA <span class="sort-icon" id="cgpa-sort-icon">↕</span>
+                        </th>
+                        <th>Resume</th>
+                    </tr>
+                </thead>
+                <tbody id="students-tbody">
+                    <tr><td colspan="5" class="empty-table"><p>Loading students…</p></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top:12px;font-size:13px;color:#94a3b8" id="result-count"></div>
+    </div>
+
+    <script>
+    let allStudents = [];
+    let cgpaSortDir = '';
+
+    function toggleCgpaSort() {
+        if (cgpaSortDir === 'desc') cgpaSortDir = 'asc';
+        else cgpaSortDir = 'desc';
+        document.getElementById('cgpaSort').value = cgpaSortDir;
+        document.getElementById('cgpa-sort-icon').textContent = cgpaSortDir === 'asc' ? '↑' : '↓';
+        applyFilters();
+    }
+
+    async function fetchStudents() {
+        try {
+            const res = await fetch('/students');
+            allStudents = await res.json();
+            updateStats();
+            applyFilters();
+        } catch (e) {
+            document.getElementById('students-tbody').innerHTML =
+                '<tr><td colspan="5" class="empty-table"><p>Failed to load students. Is the server running?</p></td></tr>';
+        }
+    }
+
+    function updateStats() {
+        document.getElementById('stat-total').textContent = allStudents.length;
+        const withResume = allStudents.filter(s => s.resumeData || s.resumePdf).length;
+        document.getElementById('stat-resumes').textContent = withResume;
+        const cgpas = allStudents.filter(s => s.cgpa != null).map(s => s.cgpa);
+        document.getElementById('stat-avgcgpa').textContent =
+            cgpas.length > 0 ? (cgpas.reduce((a,b)=>a+b,0)/cgpas.length).toFixed(2) : 'N/A';
+    }
+
+    function applyFilters() {
+        const search  = document.getElementById('searchInput').value.trim().toLowerCase();
+        const dept    = document.getElementById('deptFilter').value;
+        const sortDir = document.getElementById('cgpaSort').value || cgpaSortDir;
+        const resumeF = document.getElementById('resumeFilter').value;
+
+        // sync sort icon
+        if (sortDir) {
+            cgpaSortDir = sortDir;
+            document.getElementById('cgpa-sort-icon').textContent = sortDir === 'asc' ? '↑' : '↓';
+        }
+
+        let list = allStudents.filter(s => {
+            const matchSearch = !search ||
+                (s.name||'').toLowerCase().includes(search) ||
+                (s.email||'').toLowerCase().includes(search) ||
+                (s.username||'').toLowerCase().includes(search);
+            const matchDept = !dept || (s.department||'').toUpperCase() === dept.toUpperCase();
+            const matchResume = !resumeF ||
+                (resumeF === 'yes' && (s.resumeData || s.resumePdf)) ||
+                (resumeF === 'no'  && !s.resumeData && !s.resumePdf);
+            return matchSearch && matchDept && matchResume;
+        });
+
+        if (sortDir === 'asc') {
+            list.sort((a,b) => {
+                if (a.cgpa == null && b.cgpa == null) return 0;
+                if (a.cgpa == null) return 1;
+                if (b.cgpa == null) return -1;
+                return a.cgpa - b.cgpa;
+            });
+        } else if (sortDir === 'desc') {
+            list.sort((a,b) => {
+                if (a.cgpa == null && b.cgpa == null) return 0;
+                if (a.cgpa == null) return 1;
+                if (b.cgpa == null) return -1;
+                return b.cgpa - a.cgpa;
+            });
+        }
+
+        renderTable(list);
+        const count = document.getElementById('result-count');
+        count.textContent = list.length === allStudents.length
+            ? `Showing all ${allStudents.length} students`
+            : `Showing ${list.length} of ${allStudents.length} students`;
+    }
+
+    function renderTable(list) {
+        const tbody = document.getElementById('students-tbody');
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-table"><p>No students match your filters.</p></td></tr>';
+            lucide.createIcons();
+            return;
+        }
+        tbody.innerHTML = list.map(s => {
+            const initials = (s.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+            const cgpaHtml = s.cgpa != null
+                ? `<div class="cgpa-val">${parseFloat(s.cgpa).toFixed(2)}</div>
+                   <div class="cgpa-bar-wrap"><div class="cgpa-bar" style="width:${Math.min(s.cgpa/10*100,100)}%"></div></div>`
+                : `<span class="cgpa-na">Not set</span>`;
+            let resumeBtn;
+            if (s.resumePdf) {
+                resumeBtn = `<a href="${s.resumePdf}" target="_blank" class="btn-resume"><i data-lucide="file-text"></i> View PDF</a>`;
+            } else if (s.resumeData) {
+                resumeBtn = `<a href="view-resume.html?username=${encodeURIComponent(s.username)}" target="_blank" class="btn-resume"><i data-lucide="file-text"></i> View Resume</a>`;
+            } else {
+                resumeBtn = `<span class="btn-resume-disabled">No resume</span>`;
+            }
+            return `
+            <tr>
+                <td>
+                    <div class="student-cell">
+                        <div class="avatar">${initials}</div>
+                        <div>
+                            <div class="student-name">${esc(s.name||'—')}</div>
+                            <div class="student-email">${esc(s.email||s.username||'—')}</div>
+                        </div>
+                    </div>
+                </td>
+                <td><span class="dept-badge">${esc(s.department||'—')}</span></td>
+                <td>${esc(s.gender||'—')}</td>
+                <td>${cgpaHtml}</td>
+                <td>${resumeBtn}</td>
+            </tr>`;
+        }).join('');
+        lucide.createIcons();
+    }
+
+    function esc(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function showToast(msg, type='success') {
+        const wrap = document.getElementById('toast-wrap');
+        const icons = {success:'✓',error:'✕',info:'ℹ'};
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.innerHTML = `<span style="font-size:17px;flex-shrink:0">${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+        wrap.appendChild(t);
+        setTimeout(()=>{ t.style.animation='tOut .3s ease forwards'; setTimeout(()=>t.remove(),300); }, 3200);
+    }
+
+    document.getElementById('logout').addEventListener('click', e => {
+        e.preventDefault();
+        localStorage.removeItem('companyData');
+        window.location.href = 'company-login.html';
+    });
+
+    window.onload = fetchStudents;
+    </script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
