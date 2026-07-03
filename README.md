@@ -166,11 +166,11 @@ http://localhost:3000
 
 | Name | Role |
 |------|------|
-| **Mehul Chavan** | Frontend Development |
-| Soham B. | Backend Development |
+| **Mehul (me)** | Frontend Development |
+| Soham | Backend Development |
 | Ajinkya Bondge | AI Features |
-| Atharv | Resume Module |
-| Prateek | Backend & Deployment |
+| Atharva | Resume Module |
+| Pratik | Backend & Deployment |
 
 ---
 
