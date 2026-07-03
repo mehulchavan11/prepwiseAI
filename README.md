@@ -168,7 +168,7 @@ http://localhost:3000
 |------|------|
 | **Mehul (me)** | Frontend Development |
 | Soham | Backend Development |
-| Ajinkya Bondge | AI Features |
+| Ajinkya | AI Features |
 | Atharva | Resume Module |
 | Pratik | Backend & Deployment |
 
