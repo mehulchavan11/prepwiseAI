@@ -164,13 +164,11 @@ http://localhost:3000
 
 # 👥 Team Members
 
-| Name | Role |
-|------|------|
-| **Mehul (me)** | Frontend Development |
-| Soham | Backend Development |
-| Ajinkya | AI Features |
-| Atharva | Resume Module |
-| Pratik | Backend & Deployment |
+- **Mehul (me)**
+- **Soham**
+- **Pratik**
+- **Ajinkya**
+- **Atharva**
 
 ---
 
